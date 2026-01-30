@@ -2,6 +2,7 @@
   "expo": {
     "name": "V4 System",
     "slug": "v4system-app",
+    "scheme": "v4system",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -24,7 +25,9 @@
       "edgeToEdgeEnabled": true
     },
     "plugins": [
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-font",
+      "expo-router"
     ],
     "extra": {
       "eas": {
