@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   login as loginService,
@@ -9,6 +15,9 @@ import { LoginResponse } from "../models/loginResponse";
 
 interface AuthContextData {
   userToken: string | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+
   signIn: (cpf: string, senha: string) => Promise<LoginResponse>;
   validatePhone: (telefone: number, cpf: string) => Promise<boolean>;
   trocaSenha: (cpf: string, senha: string) => Promise<number>;
@@ -19,12 +28,29 @@ const AuthContext = createContext<AuthContextData | undefined>(undefined);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [userToken, setUserToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const isAuthenticated = !!userToken;
+
+  useEffect(() => {
+    bootstrapAuth();
+  }, []);
+
+  async function bootstrapAuth() {
+    try {
+      const token = await AsyncStorage.getItem("@token");
+      if (token) {
+        setUserToken(token);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const signIn = async (cpf: string, senha: string): Promise<LoginResponse> => {
     cpf = cpf.replace(/\D/g, "");
 
     const response = await loginService({ cpf, senha });
-
     const {
       token,
       usuarioNome,
@@ -56,38 +82,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   ): Promise<boolean> => {
     try {
       cpf = cpf.replace(/\D/g, "");
-
       const response = await validaTelefoneService(telefone, cpf);
-
-      // Aqui você retorna SOMENTE o boolean
       return response.data === true;
-    } catch (error) {
-      console.error("Erro ao validar telefone:", error);
+    } catch {
       return false;
     }
   };
 
   const trocaSenha = async (cpf: string, senha: string): Promise<number> => {
-    try {
-      cpf = cpf.replace(/\D/g, "");
-
-      const response = await trocaSenhaService({ cpf, senha });
-
-      return response.status;
-    } catch (error) {
-      console.error("Erro ao trocar senha:", error);
-      throw error;
-    }
+    cpf = cpf.replace(/\D/g, "");
+    const response = await trocaSenhaService({ cpf, senha });
+    return response.status;
   };
 
   const signOut = async () => {
     setUserToken(null);
-    await AsyncStorage.removeItem("@token");
+    await AsyncStorage.multiRemove([
+      "@token",
+      "@nameUser",
+      "@usuarioId",
+      "@descriptionProfile",
+      "@login",
+      "@phone",
+      "@empresas",
+      "@lookups",
+    ]);
   };
 
   return (
     <AuthContext.Provider
-      value={{ userToken, signIn, validatePhone, trocaSenha, signOut }}
+      value={{
+        userToken,
+        isAuthenticated,
+        loading,
+        signIn,
+        validatePhone,
+        trocaSenha,
+        signOut,
+      }}
     >
       {children}
     </AuthContext.Provider>

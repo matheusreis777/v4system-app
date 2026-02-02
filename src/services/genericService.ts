@@ -15,6 +15,7 @@ export class GenericService<T> {
 
     try {
       const token = await AsyncStorage.getItem("@token");
+
       if (!token) {
         throw new Error("Token não encontrado no AsyncStorage");
       }

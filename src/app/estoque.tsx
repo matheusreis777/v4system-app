@@ -1,7 +1,7 @@
 import { View, Text, StyleSheet } from "react-native";
 import BottomTab from "../components/BottomTab/BottomTab";
 
-export default function Checklist() {
+export default function Estoque() {
   return (
     <View style={styles.container}>
       <Text>Conteúdo do Painel</Text>
