@@ -21,41 +21,25 @@ import Input from "../components/Input";
 import Button from "../components/Button";
 import { FilterDropdown } from "../components/FilterDropdown/FilterDropdown";
 import { useLookups } from "../contexts/LookupContext";
+import { maskPhone, maskData, maskPlate } from "../utils/masks";
+import { Tag } from "../components/Tag";
+import {
+  obterCorMomento,
+  obterCorNegociacao,
+  obterCorVendedor,
+} from "../utils/tagColors";
 
-/* ================== MAPS TEMPORÁRIOS ================== */
-const {
-  status,
-  momentos,
-  tiposNegociacao,
-  vendedores,
-  loading: loadingLookups,
-} = useLookups();
+import {
+  obterLabelMomento,
+  obterLabelStatus,
+  obterLabelTipoNegociacao,
+} from "../utils/enums/enumLabels";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const STATUS_MAP: Record<string, number> = {
-  Agendada: 1,
-  "Em Andamento": 2,
-  Finalizado: 3,
-  Cancelado: 4,
-};
-
-const MOMENTO_MAP: Record<string, number> = {
-  Qualificar: 1,
-  Preparação: 2,
-  Entrega: 3,
-};
-
-const TIPO_NEGOCIACAO_MAP: Record<string, number> = {
-  Venda: 1,
-  Troca: 2,
-  Consignação: 3,
-};
-
-const VENDEDORES_MAP: Record<string, number> = {
-  Brenda: 10,
-  João: 12,
-};
-
-/* ================== COMPONENTE ================== */
+interface CardMovimentacaoProps {
+  item: PainelDoVendedorDto;
+  onCancel: () => void;
+}
 
 export default function Painel() {
   const {
@@ -66,13 +50,20 @@ export default function Painel() {
     loading: loadingLookups,
   } = useLookups();
 
-  /* ================== STATES ================== */
   const [showFilters, setShowFilters] = useState(false);
   const [loadingPainel, setLoadingPainel] = useState(false);
   const [dados, setDados] = useState<PainelDoVendedorDto[]>([]);
 
+  const PAGE_SIZE = 10;
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingInicial, setLoadingInicial] = useState(true);
+  const [loadingMais, setLoadingMais] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+
   const [filters, setFilters] = useState({
-    statusId: undefined as number | undefined,
+    statusId: 170 as number | undefined,
     momentoId: undefined as number | undefined,
     tipoNegociacaoId: undefined as number | undefined,
     vendedorId: undefined as number | undefined,
@@ -81,14 +72,59 @@ export default function Painel() {
     telefone: "",
   });
 
+  async function carregarPagina(pagina: number, append = false) {
+    if (loadingMais || refreshing) return;
+
+    append ? setLoadingMais(true) : setLoadingInicial(true);
+
+    try {
+      const filtro: PainelDoVendedorFiltro = {
+        EmpresaId: Number(await AsyncStorage.getItem("@empresaId")),
+        StatusMovimentacaoId: filters.statusId,
+        MomentoId: filters.momentoId,
+        TipoNegociacaoId: filters.tipoNegociacaoId,
+        VendedorId: filters.vendedorId ? [filters.vendedorId] : undefined,
+        Placa: filters.placa || undefined,
+        Nome: filters.cliente || undefined,
+        Telefone: filters.telefone
+          ? filters.telefone.replace(/\D/g, "")
+          : undefined,
+        Pagina: pagina,
+        TamanhoDaPagina: PAGE_SIZE,
+        OrdenarPor: "DataInclusao",
+        Ordem: "DESC",
+      };
+
+      const response = await painelDoVendedorService.consultar(filtro);
+      const lista = response.data.lista ?? [];
+
+      setHasMore(lista.length === PAGE_SIZE);
+      setPage(pagina);
+
+      setDados((prev) => (append ? [...prev, ...lista] : lista));
+    } catch {
+      Alert.alert("Erro", "Não foi possível carregar o painel");
+    } finally {
+      setLoadingInicial(false);
+      setLoadingMais(false);
+      setRefreshing(false);
+    }
+  }
+
   useEffect(() => {
-    aplicarFiltros();
+    carregarPagina(1, false);
   }, []);
 
-  /* ================== API ================== */
+  function aplicarFiltros() {
+    setShowFilters(false);
+    setHasMore(true);
+    carregarPagina(0, false);
+  }
 
-  async function aplicarFiltros() {
-    setLoadingPainel(true);
+  async function carregarMais() {
+    if (loadingMais || !hasMore) return;
+
+    setLoadingMais(true);
 
     try {
       const filtro: PainelDoVendedorFiltro = {
@@ -101,26 +137,58 @@ export default function Painel() {
         Telefone: filters.telefone
           ? filters.telefone.replace(/\D/g, "")
           : undefined,
-        Pagina: 1,
-        TamanhoDaPagina: 10,
+        Pagina: page + 1,
+        TamanhoDaPagina: PAGE_SIZE,
         OrdenarPor: "DataInclusao",
         Ordem: "DESC",
       };
 
-      setShowFilters(false);
+      const response = await painelDoVendedorService.consultar(filtro);
+      const lista = response.data.lista ?? [];
+
+      setDados((prev) => [...prev, ...lista]);
+      setPage((prev) => prev + 1);
+      setHasMore(lista.length === PAGE_SIZE);
+    } catch {
+      Alert.alert("Erro", "Não foi possível carregar mais registros");
+    } finally {
+      setLoadingMais(false);
+    }
+  }
+
+  function onRefresh() {
+    setRefreshing(true);
+    setHasMore(true);
+    setPage(1);
+    carregarPaginaInicial();
+  }
+
+  async function carregarPaginaInicial(pagina: number = 1) {
+    try {
+      const filtro: PainelDoVendedorFiltro = {
+        StatusMovimentacaoId: filters.statusId,
+        MomentoId: filters.momentoId,
+        TipoNegociacaoId: filters.tipoNegociacaoId,
+        VendedorId: filters.vendedorId ? [filters.vendedorId] : undefined,
+        Pagina: 1,
+        TamanhoDaPagina: PAGE_SIZE,
+        OrdenarPor: "DataInclusao",
+        Ordem: "DESC",
+      };
 
       const response = await painelDoVendedorService.consultar(filtro);
-      setDados(response.data.lista ?? []);
-    } catch {
-      Alert.alert("Erro", "Não foi possível carregar o painel");
+      const lista = response.data.lista ?? [];
+
+      setDados(lista);
+      setHasMore(lista.length === PAGE_SIZE);
     } finally {
-      setLoadingPainel(false);
+      setRefreshing(false);
     }
   }
 
   function limpar() {
     setFilters({
-      statusId: undefined,
+      statusId: 170,
       momentoId: undefined,
       tipoNegociacaoId: undefined,
       vendedorId: undefined,
@@ -128,27 +196,8 @@ export default function Painel() {
       cliente: "",
       telefone: "",
     });
-    aplicarFiltros();
+    onRefresh();
   }
-
-  /* ================== FORMATADORES ================== */
-
-  function formatPlaca(text: string) {
-    let v = text.toUpperCase().replace(/[^A-Z0-9]/g, "");
-    if (v.length > 7) v = v.slice(0, 7);
-    return v.length > 3 ? `${v.slice(0, 3)}-${v.slice(3)}` : v;
-  }
-
-  function formatTelefone(text: string) {
-    let v = text.replace(/\D/g, "").slice(0, 11);
-    if (v.length <= 2) return `(${v}`;
-    if (v.length <= 3) return `(${v.slice(0, 2)}) ${v.slice(2)}`;
-    if (v.length <= 7)
-      return `(${v.slice(0, 2)}) ${v.slice(2, 3)} ${v.slice(3)}`;
-    return `(${v.slice(0, 2)}) ${v.slice(2, 3)} ${v.slice(3, 7)}-${v.slice(7)}`;
-  }
-
-  /* ================== RENDER ================== */
 
   return (
     <View style={styles.screen}>
@@ -157,13 +206,12 @@ export default function Painel() {
         rightIcons={[{ icon: "plus", onPress: () => {} }]}
       />
 
-      {/* FILTROS HEADER */}
       <View style={styles.filtersHeader}>
         <TouchableOpacity
           style={styles.filterButton}
           onPress={() => setShowFilters(!showFilters)}
         >
-          <Feather name="filter" size={18} color="#ffffff" />
+          <Feather name="filter" size={22} color="#ffffff" />
           <Text style={styles.filterText}>Filtros</Text>
         </TouchableOpacity>
 
@@ -219,7 +267,7 @@ export default function Painel() {
                 value={filters.placa}
                 placeholder="ABC-1D23"
                 onChangeText={(t) =>
-                  setFilters((p) => ({ ...p, placa: formatPlaca(t) }))
+                  setFilters((p) => ({ ...p, placa: maskPlate(t) }))
                 }
               />
 
@@ -235,10 +283,7 @@ export default function Painel() {
                 placeholder="(99) 9 9999-9999"
                 value={filters.telefone}
                 onChangeText={(t) =>
-                  setFilters((p) => ({
-                    ...p,
-                    telefone: formatTelefone(t),
-                  }))
+                  setFilters((p) => ({ ...p, telefone: maskPhone(t) }))
                 }
               />
 
@@ -248,18 +293,43 @@ export default function Painel() {
         </View>
       )}
 
-      {loadingPainel && <ActivityIndicator size="large" color="#2563EB" />}
-
-      {/* LISTA */}
-
       {!showFilters && (
         <FlatList
           data={dados}
           keyExtractor={(i) => String(i.movimentacaoId)}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
-            <CardMovimentacao item={item} onCancel={item} />
+            <CardMovimentacao
+              item={item}
+              onCancel={() => {
+                Alert.alert(
+                  "Cancelar movimentação",
+                  `Deseja cancelar ${item.clienteNome}?`,
+                  [
+                    { text: "Não", style: "cancel" },
+                    { text: "Sim", style: "destructive" },
+                  ],
+                );
+              }}
+            />
           )}
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          ListFooterComponent={
+            hasMore ? (
+              <TouchableOpacity
+                style={styles.loadMoreButton}
+                onPress={carregarMais}
+                disabled={loadingMais}
+              >
+                {loadingMais ? (
+                  <ActivityIndicator color="#2563EB" />
+                ) : (
+                  <Text style={styles.loadMoreText}>Carregar mais</Text>
+                )}
+              </TouchableOpacity>
+            ) : null
+          }
         />
       )}
 
@@ -268,51 +338,80 @@ export default function Painel() {
   );
 }
 
-/* ================== COMPONENTES AUX ================== */
-
-function FilterGroup({ title, options, value, onChange }: any) {
-  return (
-    <>
-      <Text style={styles.filterTitle}>{title}</Text>
-      <View style={styles.chipsRow}>
-        {options.map((o: string) => (
-          <TouchableOpacity
-            key={o}
-            style={[styles.chip, value === o && styles.chipActive]}
-            onPress={() => onChange(o)}
-          >
-            <Text
-              style={[styles.chipText, value === o && styles.chipTextActive]}
-            >
-              {o}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </>
-  );
+function safeLabel(label?: string | null) {
+  return typeof label === "string" && label.trim().length > 0 ? label : null;
 }
 
-function CardMovimentacao({ item, onCancel }: any) {
+function CardMovimentacao({ item, onCancel }: CardMovimentacaoProps) {
+  const labelMomento = safeLabel(
+    item.momentoId ? obterLabelMomento(item.momentoId) : null,
+  );
+
+  const labelTipo = safeLabel(
+    item.tipoNegociacaoId
+      ? obterLabelTipoNegociacao(item.tipoNegociacaoId)
+      : null,
+  );
+
+  const labelStatus = safeLabel(
+    item.statusMovimentacaoId
+      ? obterLabelStatus(item.statusMovimentacaoId)
+      : null,
+  );
+
+  const dataExibida =
+    item.statusMovimentacaoId === 414 && item.dataAgendamento
+      ? maskData(item.dataAgendamento)
+      : item.dataInclusao
+        ? maskData(item.dataInclusao)
+        : "-";
+
   return (
     <View style={styles.card}>
       <View style={styles.cardHeader}>
-        <Text style={styles.cardTitle}>{item.clienteNome}</Text>
+        <Text style={styles.cardTitle}>{item.clienteNome ?? "Cliente"}</Text>
       </View>
 
-      <Text style={styles.cardInfo}>
-        {item.telefone} • {item.dataAgendamento ?? item.dataInclusao}
-      </Text>
+      <View style={styles.cardInfoRow}>
+        <Text style={styles.cardInfoLeft}>
+          {item.telefone ? maskPhone(String(item.telefone)) : "-"}
+        </Text>
 
-      <Text style={styles.cardDesc}>{item.ultimaObservacaoNaMovimentacao}</Text>
+        <Text style={styles.cardInfoRight}>{dataExibida}</Text>
+      </View>
+
+      {!!item.ultimaObservacaoNaMovimentacao && (
+        <Text style={styles.cardDesc}>
+          {item.ultimaObservacaoNaMovimentacao}
+        </Text>
+      )}
+
+      <View style={styles.cardTags}>
+        {labelMomento && (
+          <Tag label={labelMomento} color={obterCorMomento(item.momentoId)} />
+        )}
+
+        {labelTipo && (
+          <Tag
+            label={labelTipo}
+            color={obterCorNegociacao(item.tipoNegociacaoId)}
+          />
+        )}
+
+        {item.vendedorNome && (
+          <Tag label={item.vendedorNome} color={obterCorVendedor()} />
+        )}
+
+        {labelStatus && <Tag label={labelStatus} color="#475569" />}
+      </View>
 
       <View style={styles.cardActions}>
         <TouchableOpacity>
-          <Feather name="edit" size={16} color="#2563EB" />
+          <Feather name="edit" size={24} color="#2563EB" />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => onCancel(item)}>
-          <Feather name="trash-2" size={16} color="#DC2626" />
+        <TouchableOpacity onPress={onCancel}>
+          <Feather name="trash-2" size={24} color="#DC2626" />
         </TouchableOpacity>
       </View>
     </View>
@@ -343,8 +442,8 @@ const styles = StyleSheet.create({
   },
 
   filterButton: { flexDirection: "row", gap: 6 },
-  filterText: { color: "#ffffff", fontWeight: "600" },
-  clearText: { color: "#ffffff" },
+  filterText: { color: "#ffffff", fontWeight: "600", fontSize: 18 },
+  clearText: { color: "#ffffff", fontSize: 18, fontWeight: "600" },
 
   filtersBox: {
     backgroundColor: "#fff",
@@ -391,19 +490,56 @@ const styles = StyleSheet.create({
   },
 
   cardTitle: { color: "#fff", fontWeight: "600" },
-  cardInfo: { marginTop: 10, color: "#64748B" },
-  cardDesc: { marginTop: 6 },
-
-  cardActions: {
+  cardInfoRow: {
+    marginTop: 10,
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  cardInfoLeft: {
+    color: "#64748B",
+    fontSize: 13,
+  },
+
+  cardInfoRight: {
+    color: "#64748B",
+    fontSize: 13,
+    textAlign: "right",
+  },
+
+  cardDesc: { marginTop: 6 },
+
+  cardTags: {
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 12,
     borderTopWidth: 1,
     borderTopColor: "#E5E7EB",
     paddingTop: 10,
+    flexWrap: "wrap",
+  },
+
+  cardActions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 
   filtersScroll: {
     height: "70%",
+  },
+
+  loadMoreButton: {
+    marginVertical: 20,
+    alignSelf: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    backgroundColor: "#E5E7EB",
+  },
+
+  loadMoreText: {
+    color: "#2563EB",
+    fontWeight: "600",
   },
 });

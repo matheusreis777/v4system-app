@@ -18,4 +18,5 @@ export interface PainelDoVendedorFiltro {
   TamanhoDaPagina?: number;
   OrdenarPor?: string;
   Ordem?: "ASC" | "DESC";
+  EmpresaId?: number;
 }

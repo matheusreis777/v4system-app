@@ -71,10 +71,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    paddingTop: 8,
   },
   label: {
     fontSize: 11,
-    marginTop: 4,
     color: "#FFFFFF",
     fontWeight: "600",
   },

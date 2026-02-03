@@ -56,14 +56,20 @@ export default function BottomTab() {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    height: 78,
+    height: 58,
     backgroundColor: "#1844a2",
     zIndex: 0,
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    borderTopStartRadius: 22,
-    borderTopEndRadius: 22,
+    borderRadius: 30,
+    marginBottom: 20,
+    marginHorizontal: 10,
+
+    shadowColor: "#000",
+    shadowOpacity: 0.5,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 6 },
   },
 });
