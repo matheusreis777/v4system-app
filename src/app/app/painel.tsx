@@ -7,12 +7,11 @@ import {
   Alert,
   ActivityIndicator,
   ScrollView,
-  KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
-import { use, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Header from "../../components/Header/Header";
 import BottomTab from "../../components/BottomTab/BottomTab";
 import { Feather } from "@expo/vector-icons";
@@ -41,7 +40,6 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { ModalCancelarMovimentacao } from "../../components/ModalCancelarMovimentacao/modal";
-import { CancelamentoMovimentacaoFiltro } from "../../models/CencelamentoMovimentacaoFiltro";
 import ToastService from "../../components/alerts/ToastService";
 
 interface CardMovimentacaoProps {

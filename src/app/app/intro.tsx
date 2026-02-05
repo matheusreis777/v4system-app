@@ -33,10 +33,7 @@ export default function Intro() {
 
   useEffect(() => {
     async function loadUserData() {
-      const name = await AsyncStorage.getItem("@nameUser");
       const empresasStorage = await AsyncStorage.getItem("@empresas");
-
-      setNameUser(name || "");
 
       if (empresasStorage) {
         setEmpresas(JSON.parse(empresasStorage));

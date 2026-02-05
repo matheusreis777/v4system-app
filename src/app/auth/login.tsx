@@ -47,6 +47,8 @@ export default function Index() {
 
   const loadSavedCredentials = async () => {
     try {
+      await AsyncStorage.setItem("@login", cpf);
+
       const savedCpf = await AsyncStorage.getItem("@savedCpf");
       const savedSenha = await AsyncStorage.getItem("@savedSenha");
 
@@ -75,6 +77,8 @@ export default function Index() {
       if (!loginData) {
         throw new Error("Login sem retorno");
       }
+
+      await AsyncStorage.setItem("@telefone", loginData.telefone.toString());
 
       if (loginData.empresas?.length === 1) {
         await AsyncStorage.setItem(

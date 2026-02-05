@@ -1,10 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-import { statusMovimentacaoService } from "../services/lookups-painel/statusMovimentacaoService";
-import { momentoMovimentacaoService } from "../services/lookups-painel/momentosMovimentacaoService";
-import { tipoNegociacaoService } from "../services/lookups-painel/tipoNegociacaoService";
-import { vendedorService } from "../services/lookups-painel/vendedorService";
 import { useAuth } from "./AuthContext";
 
 export interface LookupItem {
@@ -12,11 +7,7 @@ export interface LookupItem {
   nome: string;
 }
 
-interface LookupContextData {
-  status: LookupItem[];
-  momentos: LookupItem[];
-  tiposNegociacao: LookupItem[];
-  vendedores: LookupItem[];
+interface LookupEstoqueContextData {
   tipoVeiculo: LookupItem[];
   marca: LookupItem[];
   modelo: LookupItem[];
@@ -25,13 +16,11 @@ interface LookupContextData {
   reload: () => Promise<void>;
 }
 
-const LookupContext = createContext<LookupContextData>({} as LookupContextData);
+const LookupContext = createContext<LookupEstoqueContextData>(
+  {} as LookupEstoqueContextData,
+);
 
 export function LookupProvider({ children }: { children: React.ReactNode }) {
-  const [status, setStatus] = useState<LookupItem[]>([]);
-  const [momentos, setMomentos] = useState<LookupItem[]>([]);
-  const [tiposNegociacao, setTiposNegociacao] = useState<LookupItem[]>([]);
-  const [vendedores, setVendedores] = useState<LookupItem[]>([]);
   const [tipoVeiculo, setTipoVeiculo] = useState<LookupItem[]>([]);
   const [marca, setMarca] = useState<LookupItem[]>([]);
   const [modelo, setModelo] = useState<LookupItem[]>([]);
@@ -50,10 +39,6 @@ export function LookupProvider({ children }: { children: React.ReactNode }) {
   }, [isAuthenticated]);
 
   async function clearLookups() {
-    setStatus([]);
-    setMomentos([]);
-    setTiposNegociacao([]);
-    setVendedores([]);
     await AsyncStorage.removeItem("@lookups");
   }
 
@@ -65,28 +50,10 @@ export function LookupProvider({ children }: { children: React.ReactNode }) {
       const cached = await AsyncStorage.getItem("@lookups");
       if (cached) {
         const data = JSON.parse(cached);
-        setStatus(data.status ?? []);
-        setMomentos(data.momentos ?? []);
-        setTiposNegociacao(data.tiposNegociacao ?? []);
-        setVendedores(data.vendedores ?? []);
       }
 
       // 2️⃣ Atualiza do backend (revalidação)
-      const results = await Promise.allSettled([
-        statusMovimentacaoService.listar(),
-        momentoMovimentacaoService.listar(),
-        tipoNegociacaoService.listar(),
-        vendedorService.listar(
-          Number(await AsyncStorage.getItem("@empresaId")),
-        ),
-      ]);
-
-      setStatus(results[0].status === "fulfilled" ? results[0].value : []);
-      setMomentos(results[1].status === "fulfilled" ? results[1].value : []);
-      setTiposNegociacao(
-        results[2].status === "fulfilled" ? results[2].value : [],
-      );
-      setVendedores(results[3].status === "fulfilled" ? results[3].value : []);
+      const results = await Promise.allSettled([]);
 
       await AsyncStorage.setItem("@lookups", JSON.stringify(results));
     } catch (error) {
@@ -99,10 +66,6 @@ export function LookupProvider({ children }: { children: React.ReactNode }) {
   return (
     <LookupContext.Provider
       value={{
-        status,
-        momentos,
-        tiposNegociacao,
-        vendedores,
         tipoVeiculo,
         marca,
         modelo,
@@ -116,6 +79,6 @@ export function LookupProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useLookups() {
+export function useLookupsEstoque() {
   return useContext(LookupContext);
 }

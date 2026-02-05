@@ -1,9 +1,10 @@
-import { View, Text, StyleSheet, TouchableOpacity, Alert } from "react-native";
+import { View, Text, StyleSheet, Alert } from "react-native";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import BottomTab from "../../components/BottomTab/BottomTab";
 import Header from "../../components/Header/Header";
 import { router } from "expo-router";
+import { maskCPF, maskPhone } from "../../utils/masks";
 
 interface Usuario {
   nome: string;
@@ -13,6 +14,7 @@ interface Usuario {
 
 export default function Perfil() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
+  const [nomeUsuario, setNomeUsuario] = useState("");
 
   useEffect(() => {
     carregarUsuario();
@@ -21,17 +23,21 @@ export default function Perfil() {
   async function carregarUsuario() {
     try {
       // 👉 OPÇÃO 1: usuário salvo como objeto
-      const userStorage = await AsyncStorage.getItem("usuario");
+      const userStorage = await AsyncStorage.getItem("@usuario");
 
       if (userStorage) {
-        setUsuario(JSON.parse(userStorage));
+        const user = JSON.parse(userStorage);
+        setUsuario(user);
+        setNomeUsuario(user.nome);
         return;
       }
 
       // 👉 OPÇÃO 2: campos separados
-      const nome = await AsyncStorage.getItem("nome");
-      const cpf = await AsyncStorage.getItem("cpf");
-      const telefone = await AsyncStorage.getItem("telefone");
+      const nome = await AsyncStorage.getItem("@nameUser");
+      const cpf = await AsyncStorage.getItem("@login");
+      const telefone = await AsyncStorage.getItem("@telefone");
+
+      setNomeUsuario(nome || "");
 
       if (nome && cpf) {
         setUsuario({
@@ -61,28 +67,47 @@ export default function Perfil() {
 
   return (
     <>
-      <Header title="Perfil" />
+      <Header
+        title="Perfil"
+        rightIcons={[
+          {
+            icon: "power",
+            onPress: handleLogout,
+          },
+        ]}
+      />
 
       <View style={styles.container}>
         <View style={styles.content}>
-          <View style={styles.card}>
-            <Text style={styles.label}>Nome</Text>
-            <Text style={styles.value}>{usuario?.nome}</Text>
-          </View>
+          <View style={styles.profileCard}>
+            {/* NOME */}
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>Nome</Text>
+              <Text style={[styles.fieldValue, { textAlign: "right" }]}>
+                {nomeUsuario || "-"}
+              </Text>
+            </View>
 
-          <View style={styles.card}>
-            <Text style={styles.label}>Login (CPF)</Text>
-            <Text style={styles.value}>{usuario?.cpf}</Text>
-          </View>
+            <View style={styles.divider} />
 
-          <View style={styles.card}>
-            <Text style={styles.label}>Telefone</Text>
-            <Text style={styles.value}>{usuario?.telefone || "-"}</Text>
-          </View>
+            {/* CPF */}
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>Login (CPF)</Text>
+              <Text style={[styles.fieldValue, { textAlign: "right" }]}>
+                {usuario?.cpf ? maskCPF(usuario.cpf) : "-"}
+              </Text>
+            </View>
 
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Text style={styles.logoutText}>Sair</Text>
-          </TouchableOpacity>
+            <View style={styles.divider} />
+
+            {/* TELEFONE */}
+            <View style={styles.field}>
+              <Text style={styles.fieldLabel}>Telefone</Text>
+              <Text style={[styles.fieldValue, { textAlign: "right" }]}>
+                {usuario?.telefone ? maskPhone(usuario.telefone) : "-"}
+              </Text>
+            </View>
+          </View>
         </View>
 
         <BottomTab />
@@ -101,32 +126,36 @@ const styles = StyleSheet.create({
     padding: 20,
   },
 
-  card: {
-    marginBottom: 16,
+  profileCard: {
+    backgroundColor: "#FFF",
+    borderRadius: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 16,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
   },
 
-  label: {
-    fontSize: 14,
-    color: "#666",
+  field: {
+    paddingVertical: 14,
   },
 
-  value: {
+  fieldLabel: {
+    fontSize: 13,
+    color: "#888",
+    marginBottom: 4,
+  },
+
+  fieldValue: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#000",
+    color: "#111",
   },
 
-  logoutButton: {
-    marginTop: 30,
-    backgroundColor: "#E53935",
-    paddingVertical: 14,
-    borderRadius: 6,
-    alignItems: "center",
-  },
-
-  logoutText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "bold",
+  divider: {
+    height: 1,
+    backgroundColor: "#eee",
   },
 });
