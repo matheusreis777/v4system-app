@@ -26,6 +26,8 @@ export default function Intro() {
   async function selectEmpresa(empresa: any) {
     await AsyncStorage.setItem("@empresaSelecionada", JSON.stringify(empresa));
     await AsyncStorage.setItem("@empresaId", String(empresa.id));
+    await AsyncStorage.setItem("@nameempresa", empresa.nome);
+
     router.replace("/app/painel");
   }
 

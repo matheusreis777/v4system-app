@@ -70,6 +70,7 @@ export default function Painel() {
   const [loadingMais, setLoadingMais] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [empresaId, setEmpresaId] = useState<number | null>(null);
+  const [nomeEmpresa, setNomeEmpresa] = useState("");
 
   const [cancelarItem, setCancelarItem] = useState<PainelDoVendedorDto | null>(
     null,
@@ -130,6 +131,9 @@ export default function Painel() {
   useEffect(() => {
     async function carregarEmpresa() {
       const empresaIdStorage = await AsyncStorage.getItem("@empresaId");
+      const nomeEmpresa = await AsyncStorage.getItem("@nameempresa");
+
+      setNomeEmpresa(nomeEmpresa || "");
       setEmpresaId(empresaId);
 
       if (empresaIdStorage) {
@@ -249,6 +253,7 @@ export default function Painel() {
     <View style={styles.screen}>
       <Header
         title="Painel de Movimentações"
+        empresa={nomeEmpresa}
         leftIcon="chevron-left"
         onLeftPress={() => router.replace("/app/intro")}
         rightIcons={[

@@ -12,6 +12,7 @@ import { LinearGradient } from "expo-linear-gradient";
 
 interface HeaderProps {
   title: string;
+  empresa?: string;
 
   leftIcon?: keyof typeof Feather.glyphMap;
   onLeftPress?: () => void;
@@ -24,6 +25,7 @@ interface HeaderProps {
 
 export default function Header({
   title,
+  empresa,
   leftIcon,
   onLeftPress,
   rightIcons = [],
@@ -52,10 +54,17 @@ export default function Header({
           )}
         </View>
 
-        {/* TÍTULO */}
-        <Text style={styles.title} numberOfLines={1}>
-          {title}
-        </Text>
+        {/* CENTRO (TÍTULO + SUBTÍTULO) */}
+        <View style={styles.center}>
+          {empresa && (
+            <Text style={styles.subtitle} numberOfLines={1}>
+              {empresa}
+            </Text>
+          )}
+          <Text style={styles.title} numberOfLines={2}>
+            {title}
+          </Text>
+        </View>
 
         {/* DIREITA */}
         <View style={[styles.side, styles.right]}>
@@ -108,11 +117,21 @@ const styles = StyleSheet.create({
     justifyContent: "flex-end",
   },
 
-  title: {
+  center: {
     flex: 1,
-    textAlign: "center",
+    alignItems: "center",
+  },
+
+  title: {
     fontSize: 20,
     fontWeight: "700",
+    color: "#ffffff",
+  },
+
+  subtitle: {
+    marginTop: 2,
+    fontSize: 15,
+    fontWeight: "600",
     color: "#ffffff",
   },
 
