@@ -18,11 +18,11 @@ import { novoLeadService } from "../../services/novoLeadService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function NovoLead() {
-  const [nome, setNome] = useState("teste phone");
-  const [telefoneMask, setTelefoneMask] = useState("67991431860");
+  const [nome, setNome] = useState("");
+  const [telefoneMask, setTelefoneMask] = useState("");
   const [telefoneNumero, setTelefoneNumero] = useState<number | null>(null);
   const [cpfCnpj, setCpfCnpj] = useState("");
-  const [observacao, setObservacao] = useState("teste phone");
+  const [observacao, setObservacao] = useState("");
   const [errors, setErrors] = useState<any>({});
   const [loading, setLoading] = useState(false);
 

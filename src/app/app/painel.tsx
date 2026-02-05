@@ -499,9 +499,11 @@ function CardMovimentacao({ item, onCancel }: CardMovimentacaoProps) {
           <Feather name="edit" size={24} color="#2563EB" />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={onCancel}>
-          <Feather name="trash-2" size={24} color="#DC2626" />
-        </TouchableOpacity>
+        {item.statusMovimentacaoId === 170 && (
+          <TouchableOpacity onPress={onCancel}>
+            <Feather name="trash-2" size={24} color="#DC2626" />
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
