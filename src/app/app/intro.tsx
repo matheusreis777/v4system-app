@@ -20,7 +20,7 @@ export default function Intro() {
 
   async function handleSignOut() {
     await signOut();
-    router.replace("/app/loginr");
+    router.replace("/auth/login");
   }
 
   async function selectEmpresa(empresa: any) {

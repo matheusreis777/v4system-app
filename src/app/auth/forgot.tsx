@@ -116,7 +116,7 @@ export default function Forgot() {
         "Agora você pode acessar o sistema",
       );
 
-      router.replace("/index");
+      router.replace("/auth/login");
     } catch {
       ToastService.error(
         "Falha ao alterar senha",
@@ -301,7 +301,7 @@ export default function Forgot() {
               </>
             )}
             {/* Esqueci senha */}
-            <TouchableOpacity onPress={() => router.replace("/index")}>
+            <TouchableOpacity onPress={() => router.replace("/auth/login")}>
               <Text style={styles.forgot}>Login</Text>
             </TouchableOpacity>
           </View>
