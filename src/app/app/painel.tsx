@@ -96,11 +96,11 @@ export default function Painel() {
 
     try {
       const filtro: PainelDoVendedorFiltro = {
-        EmpresaId: filters.empresaId, // ✅ AQUI
+        EmpresaId: filters.empresaId,
         StatusMovimentacaoId: filters.statusId,
         MomentoId: filters.momentoId,
         TipoNegociacaoId: filters.tipoNegociacaoId,
-        VendedorId: filters.vendedorId ? [filters.vendedorId] : undefined,
+        VendedorId: filters.vendedorId ? filters.vendedorId : undefined,
         Placa: filters.placa || undefined,
         Nome: filters.cliente || undefined,
         Telefone: filters.telefone
@@ -174,7 +174,7 @@ export default function Painel() {
         StatusMovimentacaoId: filters.statusId,
         MomentoId: filters.momentoId,
         TipoNegociacaoId: filters.tipoNegociacaoId,
-        VendedorId: filters.vendedorId ? [filters.vendedorId] : undefined,
+        VendedorId: filters.vendedorId ? filters.vendedorId : undefined,
         Placa: filters.placa || undefined,
         Nome: filters.cliente || undefined,
         Telefone: filters.telefone
@@ -209,11 +209,11 @@ export default function Painel() {
   async function carregarPaginaInicial(pagina: number = 1) {
     try {
       const filtro: PainelDoVendedorFiltro = {
-        EmpresaId: filters.empresaId,
+        EmpresaId: filters.empresaId ?? 0,
         StatusMovimentacaoId: filters.statusId,
         MomentoId: filters.momentoId,
         TipoNegociacaoId: filters.tipoNegociacaoId,
-        VendedorId: filters.vendedorId ? [filters.vendedorId] : undefined,
+        VendedorId: filters.vendedorId ? filters.vendedorId : undefined,
         Pagina: 1,
         TamanhoDaPagina: PAGE_SIZE,
         OrdenarPor: "DataInclusao",

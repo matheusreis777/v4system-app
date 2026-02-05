@@ -15,27 +15,22 @@ export class GenericService<TResponse = any> {
   async get(
     url: string,
     id?: string | number,
+    params?: Record<string, any>,
     config?: AxiosRequestConfig,
   ): Promise<AxiosResponse<TResponse>> {
     const finalUrl = this.montarUrl(url, id);
     config = config || {};
     config.headers = config.headers || {};
 
-    try {
-      const token = await AsyncStorage.getItem("@token");
+    const token = await AsyncStorage.getItem("@token");
+    if (!token) throw new Error("Token não encontrado");
 
-      if (!token) {
-        throw new Error("Token não encontrado no AsyncStorage");
-      }
+    config.headers["Authorization"] = `Bearer ${token}`;
+    config.headers["Content-Type"] = "application/json";
 
-      config.headers["Content-Type"] = "application/json";
-      config.headers["Authorization"] = `Bearer ${token}`;
+    config.params = params; // 👈 ESSENCIAL
 
-      return api.get<TResponse>(finalUrl, config);
-    } catch (error) {
-      console.error("Erro no GET:", error);
-      throw error;
-    }
+    return api.get<TResponse>(finalUrl, config);
   }
 
   async postFiltro(

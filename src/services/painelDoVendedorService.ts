@@ -9,9 +9,7 @@ class PainelDoVendedorService extends GenericService<
   private readonly url = "/PainelDoVendedor";
 
   consultar(filtro: PainelDoVendedorFiltro) {
-    return this.get(this.url, undefined, {
-      params: filtro,
-    });
+    return this.get(this.url, undefined, filtro);
   }
 }
 

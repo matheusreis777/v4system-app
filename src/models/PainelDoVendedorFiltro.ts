@@ -4,7 +4,7 @@ export interface PainelDoVendedorFiltro {
   TipoQualificacaoId?: number;
   StatusMovimentacaoId?: number;
 
-  VendedorId?: number[]; // backend espera LISTA
+  VendedorId?: number; // backend espera LISTA
   Placa?: string;
   Telefone?: string;
   Nome?: string;
@@ -18,5 +18,5 @@ export interface PainelDoVendedorFiltro {
   TamanhoDaPagina?: number;
   OrdenarPor?: string;
   Ordem?: "ASC" | "DESC";
-  EmpresaId?: number;
+  EmpresaId: number;
 }

@@ -68,7 +68,9 @@ export function LookupProvider({ children }: { children: React.ReactNode }) {
         statusMovimentacaoService.listar(),
         momentoMovimentacaoService.listar(),
         tipoNegociacaoService.listar(),
-        vendedorService.listar(),
+        vendedorService.listar(
+          Number(await AsyncStorage.getItem("@empresaId")),
+        ),
       ]);
 
       setStatus(results[0].status === "fulfilled" ? results[0].value : []);
