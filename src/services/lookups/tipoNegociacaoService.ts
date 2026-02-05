@@ -1,22 +1,22 @@
-import { LookupItem } from "../../models/lookupItem";
 import { GenericService } from "../genericService";
+import { LookupItem } from "../../models/lookupItem";
 
 interface TabelaValorDto {
   id: number;
   descricao: string;
 }
 
-export const tipoNegociacaoService = {
+class TipoNegociacaoService extends GenericService<TabelaValorDto[]> {
+  private readonly baseUrl = "/utilitario/ObterTipoNegociacao";
+
   async listar(): Promise<LookupItem[]> {
-    const service = new GenericService<TabelaValorDto[]>(
-      "/utilitario/ObterTipoNegociacao",
-    );
+    const response = await this.get(this.baseUrl);
 
-    const response = await service.get();
-
-    return response.data.map((item: any) => ({
+    return response.data.map((item) => ({
       id: item.id,
-      nome: item.descricao, // ✅ CORRETO
+      nome: item.descricao,
     }));
-  },
-};
+  }
+}
+
+export const tipoNegociacaoService = new TipoNegociacaoService();

@@ -45,8 +45,6 @@ export class GenericService<TResponse = any> {
   ): Promise<AxiosResponse<TResponse>> {
     const finalUrl = this.montarUrl(url);
 
-    console.log(data);
-
     config = config ?? {};
     config.headers = {
       ...(config.headers ?? {}),

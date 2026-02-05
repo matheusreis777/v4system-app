@@ -1,5 +1,5 @@
-import { LookupItem } from "../../models/lookupItem";
 import { GenericService } from "../genericService";
+import { LookupItem } from "../../models/lookupItem";
 
 interface VendedorSelecaoDto {
   id: number;
@@ -10,17 +10,19 @@ interface ResultadoConsulta<T> {
   lista: T[];
 }
 
-export const vendedorService = {
-  async listar(): Promise<LookupItem[]> {
-    const service = new GenericService<ResultadoConsulta<VendedorSelecaoDto>>(
-      "/vendedor",
-    );
+class VendedorService extends GenericService<
+  ResultadoConsulta<VendedorSelecaoDto>
+> {
+  private readonly baseUrl = "/vendedor";
 
-    const response = await service.get();
+  async listar(): Promise<LookupItem[]> {
+    const response = await this.get(this.baseUrl);
 
     return (response.data?.lista ?? []).map((v) => ({
       id: v.id,
       nome: v.nome,
     }));
-  },
-};
+  }
+}
+
+export const vendedorService = new VendedorService();
