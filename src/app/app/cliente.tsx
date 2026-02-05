@@ -1,20 +1,12 @@
 import { View, Text, StyleSheet } from "react-native";
-import BottomTab from "../components/BottomTab/BottomTab";
-import Header from "../components/Header/Header";
+import BottomTab from "../../components/BottomTab/BottomTab";
+import Header from "../../components/Header/Header";
 import { router } from "expo-router";
 
 export default function Painel() {
   return (
     <>
-      <Header
-        title="Clientes"
-        rightIcons={[
-          {
-            icon: "filter",
-            onPress: () => router.push("/configuracoes"),
-          },
-        ]}
-      />
+      <Header title="Clientes" />
 
       <View style={styles.container}>
         <Text>Conteúdo do Painel</Text>

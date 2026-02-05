@@ -1,5 +1,11 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Platform,
+} from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
@@ -41,7 +47,7 @@ export default function Header({
         <View style={styles.side}>
           {leftIcon && (
             <TouchableOpacity onPress={onLeftPress} style={styles.iconButton}>
-              <Feather name={leftIcon} size={22} color="#fff" />
+              <Feather name={leftIcon} size={28} color="#fff" />
             </TouchableOpacity>
           )}
         </View>
@@ -80,7 +86,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
 
     // sombra Android
-    elevation: 12,
+    elevation: Platform.OS === "android" ? 0 : 12,
 
     zIndex: 20,
   },

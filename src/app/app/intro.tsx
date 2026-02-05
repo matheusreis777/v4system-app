@@ -9,8 +9,8 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
-import Button from "../components/Button";
-import { useAuth } from "../contexts/AuthContext";
+import Button from "../../components/Button";
+import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";
 
 export default function Intro() {
@@ -20,13 +20,13 @@ export default function Intro() {
 
   async function handleSignOut() {
     await signOut();
-    router.replace("/");
+    router.replace("/index");
   }
 
   async function selectEmpresa(empresa: any) {
     await AsyncStorage.setItem("@empresaSelecionada", JSON.stringify(empresa));
     await AsyncStorage.setItem("@empresaId", String(empresa.id));
-    router.replace("/painel");
+    router.replace("/app/painel");
   }
 
   useEffect(() => {

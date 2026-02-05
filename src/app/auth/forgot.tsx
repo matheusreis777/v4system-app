@@ -12,13 +12,13 @@ import {
   Keyboard,
 } from "react-native";
 import { useState } from "react";
-import { Fonts } from "../styles/fonts";
+import { Fonts } from "../../styles/fonts";
 import { router } from "expo-router";
-import Input from "../components/Input";
-import Button from "../components/Button";
-import ToastService from "./../components/alerts/ToastService";
-import { useAuth } from "../contexts/AuthContext";
-import { useLoading } from "../contexts/LoadingContext";
+import Input from "../../components/Input";
+import Button from "../../components/Button";
+import ToastService from "./../../components/alerts/ToastService";
+import { useAuth } from "../../contexts/AuthContext";
+import { useLoading } from "../../contexts/LoadingContext";
 
 function validateStrongPassword(password: string) {
   const errors: string[] = [];
@@ -116,7 +116,7 @@ export default function Forgot() {
         "Agora você pode acessar o sistema",
       );
 
-      router.replace("/");
+      router.replace("/index");
     } catch {
       ToastService.error(
         "Falha ao alterar senha",
@@ -162,7 +162,7 @@ export default function Forgot() {
 
   return (
     <ImageBackground
-      source={require("../../assets/background.png")}
+      source={require("../../../assets/background.png")}
       style={[styles.container]}
       resizeMode="cover"
     >
@@ -184,7 +184,7 @@ export default function Forgot() {
           <View style={styles.card}>
             {/* Logo */}
             <Image
-              source={require("../../assets/logo-v4system.png")}
+              source={require("../../../assets/logo-v4system.png")}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -301,7 +301,7 @@ export default function Forgot() {
               </>
             )}
             {/* Esqueci senha */}
-            <TouchableOpacity onPress={() => router.replace("/")}>
+            <TouchableOpacity onPress={() => router.replace("/index")}>
               <Text style={styles.forgot}>Login</Text>
             </TouchableOpacity>
           </View>

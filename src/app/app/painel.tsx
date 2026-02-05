@@ -10,31 +10,39 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import { useEffect, useState } from "react";
-import Header from "../components/Header/Header";
-import BottomTab from "../components/BottomTab/BottomTab";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+
+import { use, useCallback, useEffect, useState } from "react";
+import Header from "../../components/Header/Header";
+import BottomTab from "../../components/BottomTab/BottomTab";
 import { Feather } from "@expo/vector-icons";
-import { painelDoVendedorService } from "../services/painelDoVendedorService";
-import { PainelDoVendedorDto } from "../models/PainelDoVendedorDto";
-import { PainelDoVendedorFiltro } from "../models/PainelDoVendedorFiltro";
-import Input from "../components/Input";
-import Button from "../components/Button";
-import { FilterDropdown } from "../components/FilterDropdown/FilterDropdown";
-import { useLookups } from "../contexts/LookupContext";
-import { maskPhone, maskData, maskPlate } from "../utils/masks";
-import { Tag } from "../components/Tag";
+import { painelDoVendedorService } from "../../services/painelDoVendedorService";
+import { movimentacaoService } from "../../services/movimentacaoService";
+import { PainelDoVendedorDto } from "../../models/PainelDoVendedorDto";
+import { PainelDoVendedorFiltro } from "../../models/PainelDoVendedorFiltro";
+import Input from "../../components/Input";
+import Button from "../../components/Button";
+import { FilterDropdown } from "../../components/FilterDropdown/FilterDropdown";
+import { useLookups } from "../../contexts/LookupContext";
+import { maskPhone, maskData, maskPlate } from "../../utils/masks";
+import { Tag } from "../../components/Tag";
 import {
   obterCorMomento,
   obterCorNegociacao,
   obterCorVendedor,
-} from "../utils/tagColors";
+} from "../../utils/tagColors";
 
 import {
   obterLabelMomento,
   obterLabelStatus,
   obterLabelTipoNegociacao,
-} from "../utils/enums/enumLabels";
+} from "../../utils/enums/enumLabels";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
+import { ModalCancelarMovimentacao } from "../../components/ModalCancelarMovimentacao/modal";
+import { CancelamentoMovimentacaoFiltro } from "../../models/CencelamentoMovimentacaoFiltro";
+import ToastService from "../../components/alerts/ToastService";
 
 interface CardMovimentacaoProps {
   item: PainelDoVendedorDto;
@@ -61,6 +69,12 @@ export default function Painel() {
   const [loadingInicial, setLoadingInicial] = useState(true);
   const [loadingMais, setLoadingMais] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [empresaId, setEmpresaId] = useState<number | null>(null);
+
+  const [cancelarItem, setCancelarItem] = useState<PainelDoVendedorDto | null>(
+    null,
+  );
+  const [motivoCancelamento, setMotivoCancelamento] = useState("");
 
   const [filters, setFilters] = useState({
     statusId: 170 as number | undefined,
@@ -70,16 +84,19 @@ export default function Painel() {
     placa: "",
     cliente: "",
     telefone: "",
+    empresaId: undefined as number | undefined,
   });
 
   async function carregarPagina(pagina: number, append = false) {
-    if (loadingMais || refreshing) return;
+    if (!filters.empresaId) return;
+
+    if (append && loadingMais) return;
 
     append ? setLoadingMais(true) : setLoadingInicial(true);
 
     try {
       const filtro: PainelDoVendedorFiltro = {
-        EmpresaId: Number(await AsyncStorage.getItem("@empresaId")),
+        EmpresaId: filters.empresaId, // ✅ AQUI
         StatusMovimentacaoId: filters.statusId,
         MomentoId: filters.momentoId,
         TipoNegociacaoId: filters.tipoNegociacaoId,
@@ -100,7 +117,6 @@ export default function Painel() {
 
       setHasMore(lista.length === PAGE_SIZE);
       setPage(pagina);
-
       setDados((prev) => (append ? [...prev, ...lista] : lista));
     } catch {
       Alert.alert("Erro", "Não foi possível carregar o painel");
@@ -112,22 +128,49 @@ export default function Painel() {
   }
 
   useEffect(() => {
-    carregarPagina(1, false);
+    async function carregarEmpresa() {
+      const empresaIdStorage = await AsyncStorage.getItem("@empresaId");
+      setEmpresaId(empresaId);
+
+      if (empresaIdStorage) {
+        setFilters((prev) => ({
+          ...prev,
+          empresaId: Number(empresaIdStorage),
+        }));
+      }
+    }
+
+    carregarEmpresa();
   }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (!filters.empresaId) return;
+
+      setRefreshing(false);
+      setLoadingMais(false);
+      setHasMore(true);
+      setPage(1);
+
+      carregarPagina(1, false);
+    }, [filters.empresaId]),
+  );
 
   function aplicarFiltros() {
     setShowFilters(false);
     setHasMore(true);
-    carregarPagina(0, false);
+    setPage(1);
+    carregarPagina(1, false);
   }
 
   async function carregarMais() {
-    if (loadingMais || !hasMore) return;
+    if (!filters.empresaId || loadingMais || !hasMore) return;
 
     setLoadingMais(true);
 
     try {
       const filtro: PainelDoVendedorFiltro = {
+        EmpresaId: filters.empresaId, // ✅
         StatusMovimentacaoId: filters.statusId,
         MomentoId: filters.momentoId,
         TipoNegociacaoId: filters.tipoNegociacaoId,
@@ -166,6 +209,7 @@ export default function Painel() {
   async function carregarPaginaInicial(pagina: number = 1) {
     try {
       const filtro: PainelDoVendedorFiltro = {
+        EmpresaId: filters.empresaId,
         StatusMovimentacaoId: filters.statusId,
         MomentoId: filters.momentoId,
         TipoNegociacaoId: filters.tipoNegociacaoId,
@@ -187,7 +231,7 @@ export default function Painel() {
   }
 
   function limpar() {
-    setFilters({
+    setFilters((prev) => ({
       statusId: 170,
       momentoId: undefined,
       tipoNegociacaoId: undefined,
@@ -195,7 +239,9 @@ export default function Painel() {
       placa: "",
       cliente: "",
       telefone: "",
-    });
+      empresaId: prev.empresaId, // ✅ mantém
+    }));
+
     onRefresh();
   }
 
@@ -203,7 +249,16 @@ export default function Painel() {
     <View style={styles.screen}>
       <Header
         title="Painel de Movimentações"
-        rightIcons={[{ icon: "plus", onPress: () => {} }]}
+        leftIcon="chevron-left"
+        onLeftPress={() => router.replace("/app/intro")}
+        rightIcons={[
+          {
+            icon: "plus",
+            onPress: () => {
+              router.push("/app/novoLead");
+            },
+          },
+        ]}
       />
 
       <View style={styles.filtersHeader}>
@@ -222,10 +277,14 @@ export default function Painel() {
 
       {showFilters && (
         <View style={styles.filtersScroll}>
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 210 : 0}
+          <KeyboardAwareScrollView
+            enableOnAndroid
+            enableAutomaticScroll
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+            // 🔑 AJUSTES IMPORTANTES
+            extraScrollHeight={Platform.OS === "ios" ? 10 : 120}
+            extraHeight={Platform.OS === "ios" ? 100 : 140}
           >
             <ScrollView
               contentContainerStyle={styles.filtersBox}
@@ -266,6 +325,7 @@ export default function Painel() {
               <Input
                 value={filters.placa}
                 placeholder="ABC-1D23"
+                maxLength={8}
                 onChangeText={(t) =>
                   setFilters((p) => ({ ...p, placa: maskPlate(t) }))
                 }
@@ -282,6 +342,7 @@ export default function Painel() {
                 keyboardType="numeric"
                 placeholder="(99) 9 9999-9999"
                 value={filters.telefone}
+                maxLength={16}
                 onChangeText={(t) =>
                   setFilters((p) => ({ ...p, telefone: maskPhone(t) }))
                 }
@@ -289,7 +350,7 @@ export default function Painel() {
 
               <Button onPress={aplicarFiltros} title="Aplicar filtros" />
             </ScrollView>
-          </KeyboardAvoidingView>
+          </KeyboardAwareScrollView>
         </View>
       )}
 
@@ -302,14 +363,8 @@ export default function Painel() {
             <CardMovimentacao
               item={item}
               onCancel={() => {
-                Alert.alert(
-                  "Cancelar movimentação",
-                  `Deseja cancelar ${item.clienteNome}?`,
-                  [
-                    { text: "Não", style: "cancel" },
-                    { text: "Sim", style: "destructive" },
-                  ],
-                );
+                setCancelarItem(item);
+                setMotivoCancelamento("");
               }}
             />
           )}
@@ -334,6 +389,40 @@ export default function Painel() {
       )}
 
       <BottomTab />
+
+      <ModalCancelarMovimentacao
+        visible={!!cancelarItem}
+        clienteNome={cancelarItem?.clienteNome}
+        motivo={motivoCancelamento}
+        onChangeMotivo={setMotivoCancelamento}
+        onCancelar={() => {
+          setCancelarItem(null);
+          setMotivoCancelamento("");
+        }}
+        onConfirmar={async () => {
+          if (!cancelarItem || !filters.empresaId) return;
+
+          // 🔒 captura os valores ANTES do await
+          const movimentacaoId = cancelarItem.movimentacaoId;
+          const justificativa = motivoCancelamento;
+
+          try {
+            await movimentacaoService.cancelar({
+              movimentacaoId,
+              justificativa,
+            });
+
+            // fecha modal
+            setCancelarItem(null);
+            setMotivoCancelamento("");
+
+            ToastService.success("Movimentação cancelada com sucesso");
+            carregarPaginaInicial();
+          } catch {
+            Alert.alert("Erro", "Não foi possível cancelar a movimentação");
+          }
+        }}
+      />
     </View>
   );
 }

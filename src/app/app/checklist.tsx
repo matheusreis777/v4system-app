@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
-import BottomTab from "../components/BottomTab/BottomTab";
+import BottomTab from "../../components/BottomTab/BottomTab";
 
 export default function Checklist() {
   return (

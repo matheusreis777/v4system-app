@@ -6,13 +6,11 @@ import { PainelDoVendedorDto } from "../models/PainelDoVendedorDto";
 class PainelDoVendedorService extends GenericService<
   ResultadoConsulta<PainelDoVendedorDto>
 > {
-  constructor() {
-    super("/PainelDoVendedor");
-  }
+  private readonly url = "/PainelDoVendedor";
 
-  async consultar(filtro: PainelDoVendedorFiltro) {
-    return this.get(undefined, {
-      params: filtro, // 🔥 QUERY STRING
+  consultar(filtro: PainelDoVendedorFiltro) {
+    return this.get(this.url, undefined, {
+      params: filtro,
     });
   }
 }

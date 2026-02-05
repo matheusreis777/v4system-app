@@ -1,11 +1,25 @@
-// components/AuthGate.tsx
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 import { View, ActivityIndicator } from "react-native";
 import { useAuth } from "../contexts/AuthContext";
-import { Redirect } from "expo-router";
+import { useRouter, usePathname } from "expo-router";
 
 export function AuthGate({ children }: { children: ReactNode }) {
   const { loading, isAuthenticated } = useAuth();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  useEffect(() => {
+    if (loading) return;
+    if (!pathname) return; // 🔥 FIX CRÍTICO
+
+    if (!isAuthenticated && pathname !== "/login") {
+      router.replace("/login");
+    }
+
+    if (isAuthenticated && pathname === "/login") {
+      router.replace("/painel");
+    }
+  }, [loading, isAuthenticated, pathname]);
 
   if (loading) {
     return (
@@ -13,10 +27,6 @@ export function AuthGate({ children }: { children: ReactNode }) {
         <ActivityIndicator size="large" />
       </View>
     );
-  }
-
-  if (!isAuthenticated) {
-    return <Redirect href="/login" />;
   }
 
   return <>{children}</>;

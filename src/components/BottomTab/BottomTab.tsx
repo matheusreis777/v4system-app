@@ -1,14 +1,14 @@
-import { View, StyleSheet } from "react-native";
+import { View, StyleSheet, Platform } from "react-native";
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import { usePathname, router } from "expo-router";
 import { TabItem } from "./TabItem";
 
 const tabs = [
-  { label: "Painel", route: "/painel", icon: "painel" },
-  { label: "Estoque", route: "/estoque", icon: "estoque" },
-  { label: "Clientes", route: "/cliente", icon: "clientes" },
-  { label: "Checklist", route: "/checklist", icon: "checklist" },
-  { label: "Perfil", route: "/perfil", icon: "perfil" },
+  { label: "Painel", route: "/app/painel", icon: "painel" },
+  { label: "Estoque", route: "/app/estoque", icon: "estoque" },
+  { label: "Clientes", route: "/app/cliente", icon: "clientes" },
+  { label: "Checklist", route: "/app/checklist", icon: "checklist" },
+  { label: "Perfil", route: "/app/perfil", icon: "perfil" },
 ];
 
 function renderIcon(name: string, active: boolean) {
@@ -64,11 +64,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     borderRadius: 30,
-    marginBottom: 20,
+    marginBottom: Platform.OS === "android" ? 38 : 20,
     marginHorizontal: 10,
 
     shadowColor: "#000",
-    shadowOpacity: 0.5,
+    shadowOpacity: 0.6,
     shadowRadius: 4,
     shadowOffset: { width: 0, height: 6 },
   },
