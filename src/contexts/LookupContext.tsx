@@ -17,10 +17,6 @@ interface LookupContextData {
   momentos: LookupItem[];
   tiposNegociacao: LookupItem[];
   vendedores: LookupItem[];
-  tipoVeiculo: LookupItem[];
-  marca: LookupItem[];
-  modelo: LookupItem[];
-  statusVeiculo: LookupItem[];
   loading: boolean;
   reload: () => Promise<void>;
 }
@@ -90,7 +86,7 @@ export function LookupProvider({ children }: { children: React.ReactNode }) {
 
       await AsyncStorage.setItem("@lookups", JSON.stringify(results));
     } catch (error) {
-      console.error("Erro ao carregar lookups", error);
+      console.error("Erro ao carregar lookups painel", error);
     } finally {
       setLoading(false);
     }
@@ -103,10 +99,6 @@ export function LookupProvider({ children }: { children: React.ReactNode }) {
         momentos,
         tiposNegociacao,
         vendedores,
-        tipoVeiculo,
-        marca,
-        modelo,
-        statusVeiculo,
         loading,
         reload: loadLookups,
       }}

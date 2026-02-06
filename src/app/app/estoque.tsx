@@ -55,13 +55,8 @@ export default function Estoque() {
   const [nomeEmpresa, setNomeEmpresa] = useState("");
   const [showFilters, setShowFilters] = useState(false);
 
-  const {
-    tipoVeiculo,
-    marca,
-    modelo,
-    statusVeiculo,
-    loading: loadingLookups,
-  } = useLookupsEstoque();
+  const { tipoVeiculo, marca, modelo, statusVeiculo, reload } =
+    useLookupsEstoque();
 
   const [filters, setFilters] = useState({
     placa: "",
@@ -84,7 +79,44 @@ export default function Estoque() {
     carregarEstoque();
   }, []);
 
-  function limpar() {}
+  useEffect(() => {
+    if (filters.tipoVeiculoId) {
+      reload({ tipoVeiculoId: filters.tipoVeiculoId });
+
+      setFilters((p) => ({
+        ...p,
+        marcaId: undefined,
+        modeloId: undefined,
+      }));
+    }
+  }, [filters.tipoVeiculoId]);
+
+  useEffect(() => {
+    if (filters.tipoVeiculoId && filters.marcaId) {
+      reload({
+        tipoVeiculoId: filters.tipoVeiculoId,
+        marcaId: filters.marcaId,
+      });
+
+      setFilters((p) => ({
+        ...p,
+        modeloId: undefined,
+      }));
+    }
+  }, [filters.marcaId]);
+
+  function limpar() {
+    setFilters({
+      placa: "",
+      tipoVeiculoId: undefined,
+      marcaId: undefined,
+      modeloId: undefined,
+      statusVeiculoId: undefined,
+      empresaId: empresaId ?? 0,
+    });
+
+    reload();
+  }
 
   function aplicarFiltros() {}
 
@@ -159,35 +191,37 @@ export default function Estoque() {
               keyboardShouldPersistTaps="handled"
               showsVerticalScrollIndicator={false}
             >
-              {/* <FilterDropdown
+              <FilterDropdown
                 label="Tipo Veículo"
                 value={filters.tipoVeiculoId}
                 options={tipoVeiculo}
-                onChange={(id) => console.log("teste")}
+                onChange={(id) =>
+                  setFilters((p) => ({ ...p, tipoVeiculoId: id }))
+                }
               />
 
               <FilterDropdown
                 label="Marca"
                 options={marca}
                 value={filters.marcaId}
-                onChange={(id) => setFilters((p) => ({ ...p, momentoId: id }))}
+                onChange={(id) => setFilters((p) => ({ ...p, marcaId: id }))}
               />
 
               <FilterDropdown
                 label="Modelo"
                 options={modelo}
                 value={filters.modeloId}
-                onChange={(id) =>
-                  setFilters((p) => ({ ...p, tipoNegociacaoId: id }))
-                }
+                onChange={(id) => setFilters((p) => ({ ...p, modeloId: id }))}
               />
 
               <FilterDropdown
                 label="Status Veículo"
                 options={statusVeiculo}
                 value={filters.statusVeiculoId}
-                onChange={(id) => setFilters((p) => ({ ...p, vendedorId: id }))}
-              /> */}
+                onChange={(id) =>
+                  setFilters((p) => ({ ...p, statusVeiculoId: id }))
+                }
+              />
 
               <Button onPress={aplicarFiltros} title="Aplicar filtros" />
             </ScrollView>

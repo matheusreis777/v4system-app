@@ -1,10 +1,19 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAuth } from "./AuthContext";
+import { tipoVeiculoService } from "../services/lookups-estoque/tipoVeiculoService";
+import { marcaService } from "../services/lookups-estoque/marcaService";
+import { modeloService } from "../services/lookups-estoque/modeloService";
+import { statusVeiculoService } from "../services/lookups-estoque/statusVeiculoService";
 
 export interface LookupItem {
   id: number;
   nome: string;
+}
+
+interface ReloadParams {
+  tipoVeiculoId?: number;
+  marcaId?: number;
 }
 
 interface LookupEstoqueContextData {
@@ -13,14 +22,18 @@ interface LookupEstoqueContextData {
   modelo: LookupItem[];
   statusVeiculo: LookupItem[];
   loading: boolean;
-  reload: () => Promise<void>;
+  reload: (params?: ReloadParams) => Promise<void>;
 }
 
 const LookupContext = createContext<LookupEstoqueContextData>(
   {} as LookupEstoqueContextData,
 );
 
-export function LookupProvider({ children }: { children: React.ReactNode }) {
+export function LookupProviderEstoque({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [tipoVeiculo, setTipoVeiculo] = useState<LookupItem[]>([]);
   const [marca, setMarca] = useState<LookupItem[]>([]);
   const [modelo, setModelo] = useState<LookupItem[]>([]);
@@ -32,32 +45,72 @@ export function LookupProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (isAuthenticated) {
-      loadLookups();
+      reload();
     } else {
       clearLookups();
     }
   }, [isAuthenticated]);
 
   async function clearLookups() {
-    await AsyncStorage.removeItem("@lookups");
+    setTipoVeiculo([]);
+    setMarca([]);
+    setModelo([]);
+    setStatusVeiculo([]);
+    await AsyncStorage.removeItem("@lookupsEstoque");
   }
 
-  async function loadLookups() {
+  async function reload(params?: ReloadParams) {
     setLoading(true);
 
     try {
-      // 1️⃣ Carrega cache imediatamente
-      const cached = await AsyncStorage.getItem("@lookups");
+      const cached = await AsyncStorage.getItem("@lookupsEstoque");
       if (cached) {
         const data = JSON.parse(cached);
+        setTipoVeiculo(data.tipoVeiculo ?? []);
+        setStatusVeiculo(data.statusVeiculo ?? []);
+        setMarca(data.marca ?? []);
+        setModelo(data.modelo ?? []);
       }
 
-      // 2️⃣ Atualiza do backend (revalidação)
-      const results = await Promise.allSettled([]);
+      const [tipoVeiculoData, statusVeiculoData] = await Promise.all([
+        tipoVeiculoService.listar(),
+        statusVeiculoService.listar(),
+      ]);
 
-      await AsyncStorage.setItem("@lookups", JSON.stringify(results));
+      setTipoVeiculo(tipoVeiculoData);
+      setStatusVeiculo(statusVeiculoData);
+
+      let marcaData: LookupItem[] = [];
+      let modeloData: LookupItem[] = [];
+
+      if (params?.tipoVeiculoId) {
+        marcaData = await marcaService.listar(params.tipoVeiculoId);
+        setMarca(marcaData);
+      } else {
+        setMarca([]);
+      }
+
+      if (params?.tipoVeiculoId && params?.marcaId) {
+        modeloData = await modeloService.listar(
+          params.marcaId,
+          params.tipoVeiculoId,
+        );
+        setModelo(modeloData);
+      } else {
+        setModelo([]);
+      }
+
+      await AsyncStorage.setItem(
+        "@lookupsEstoque",
+        JSON.stringify({
+          tipoVeiculo: tipoVeiculoData,
+          statusVeiculo: statusVeiculoData,
+          marca: marcaData,
+          modelo: modeloData,
+        }),
+      );
     } catch (error) {
-      console.error("Erro ao carregar lookups", error);
+      console.error("Erro ao carregar lookups estoque", error);
     } finally {
       setLoading(false);
     }
@@ -71,7 +124,7 @@ export function LookupProvider({ children }: { children: React.ReactNode }) {
         modelo,
         statusVeiculo,
         loading,
-        reload: loadLookups,
+        reload,
       }}
     >
       {children}
