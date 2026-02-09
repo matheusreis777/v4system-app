@@ -88,7 +88,9 @@ export default function Estoque() {
 
   useEffect(() => {
     if (!filters.empresaId) return;
-    resetAndLoad();
+    setPage(1);
+    setHasMore(true);
+    carregarPagina(1, false);
   }, [filters.empresaId]);
 
   async function carregarPagina(pagina: number, append = false) {
@@ -277,6 +279,76 @@ export default function Estoque() {
         </TouchableOpacity>
       </View>
 
+      {showFilters && (
+        <View style={styles.filtersScroll}>
+          <KeyboardAwareScrollView
+            enableOnAndroid
+            enableAutomaticScroll
+            keyboardShouldPersistTaps="handled"
+            extraScrollHeight={Platform.OS === "ios" ? 10 : 120}
+            extraHeight={Platform.OS === "ios" ? 100 : 140}
+          >
+            <ScrollView
+              contentContainerStyle={styles.filtersBox}
+              keyboardShouldPersistTaps="handled"
+            >
+              <FilterDropdown
+                label="Tipo Veículo"
+                value={filters.tipoVeiculoId}
+                options={tipoVeiculo}
+                onChange={(id) => {
+                  setFilters((p) => ({
+                    ...p,
+                    tipoVeiculoId: id,
+                    marcaId: undefined,
+                    modeloId: undefined,
+                  }));
+
+                  reload({
+                    tipoVeiculoId: id,
+                    marcaId: undefined,
+                  });
+                }}
+              />
+
+              <FilterDropdown
+                label="Marca"
+                options={marca}
+                value={filters.marcaId}
+                onChange={(id) => {
+                  setFilters((p) => ({
+                    ...p,
+                    marcaId: id,
+                    modeloId: undefined,
+                  }));
+
+                  reload({
+                    tipoVeiculoId: filters.tipoVeiculoId,
+                    marcaId: id,
+                  });
+                }}
+              />
+
+              <FilterDropdown
+                label="Modelo"
+                options={modelo}
+                value={filters.modeloId}
+                onChange={(id) => setFilters((p) => ({ ...p, modeloId: id }))}
+              />
+              <FilterDropdown
+                label="Status Veículo"
+                options={statusVeiculo}
+                value={filters.statusVeiculoId}
+                onChange={(id) =>
+                  setFilters((p) => ({ ...p, statusVeiculoId: id }))
+                }
+              />
+              <Button onPress={aplicarFiltros} title="Aplicar filtros" />
+            </ScrollView>
+          </KeyboardAwareScrollView>
+        </View>
+      )}
+
       {!showFilters && (
         <View style={styles.container}>
           <View style={styles.searchBox}>
@@ -346,6 +418,15 @@ const styles = StyleSheet.create({
     height: 80,
   },
 
+  filtersBox: {
+    backgroundColor: "#fff",
+    marginHorizontal: 16,
+    padding: 16,
+    borderRadius: 12,
+    paddingBottom: 40,
+  },
+
+  filtersScroll: { height: "70%", marginTop: 20 },
   filterButton: { flexDirection: "row", gap: 6 },
   filterText: { color: "#ffffff", fontWeight: "600", fontSize: 18 },
   clearText: { color: "#ffffff", fontSize: 18, fontWeight: "600" },

@@ -85,6 +85,7 @@ export function LookupProviderEstoque({
 
       if (params?.tipoVeiculoId) {
         marcaData = await marcaService.listar(params.tipoVeiculoId);
+        console.log("Marcas carregadas:", marcaData);
         setMarca(marcaData);
       } else {
         setMarca([]);
