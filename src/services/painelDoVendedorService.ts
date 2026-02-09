@@ -1,10 +1,10 @@
 import { GenericService } from "./genericService";
-import { PainelDoVendedorFiltro } from "../models/PainelDoVendedorFiltro";
+import { PainelDoVendedor } from "../models/painelDoVendedor";
 import { ResultadoConsulta } from "../models/ResultadoConsulta";
-import { PainelDoVendedorDto } from "../models/PainelDoVendedorDto";
+import { PainelDoVendedorFiltro } from "../models/PainelDoVendedorFiltro";
 
 class PainelDoVendedorService extends GenericService<
-  ResultadoConsulta<PainelDoVendedorDto>
+  ResultadoConsulta<PainelDoVendedor>
 > {
   private readonly url = "/PainelDoVendedor";
 

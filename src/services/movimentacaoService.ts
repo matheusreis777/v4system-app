@@ -1,5 +1,5 @@
 import { GenericService } from "./genericService";
-import { CancelamentoMovimentacaoFiltro } from "../models/CencelamentoMovimentacaoFiltro";
+import { CancelamentoMovimentacaoFiltro } from "../models/cancelamentoMovimentacaoFiltro";
 
 class MovimentacaoService extends GenericService<any> {
   private readonly baseUrl = "/Movimentacao";

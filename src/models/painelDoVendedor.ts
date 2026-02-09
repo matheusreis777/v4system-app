@@ -1,4 +1,4 @@
-export interface PainelDoVendedorDto {
+export interface PainelDoVendedor {
   movimentacaoId: number;
   momentoId: number;
   tipoNegociacaoId: number;

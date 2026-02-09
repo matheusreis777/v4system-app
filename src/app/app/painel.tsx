@@ -17,8 +17,7 @@ import BottomTab from "../../components/BottomTab/BottomTab";
 import { Feather } from "@expo/vector-icons";
 import { painelDoVendedorService } from "../../services/painelDoVendedorService";
 import { movimentacaoService } from "../../services/movimentacaoService";
-import { PainelDoVendedorDto } from "../../models/PainelDoVendedorDto";
-import { PainelDoVendedorFiltro } from "../../models/PainelDoVendedorFiltro";
+import { PainelDoVendedor } from "../../models/painelDoVendedor";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
 import { FilterDropdown } from "../../components/FilterDropdown/FilterDropdown";
@@ -41,9 +40,10 @@ import { router } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { ModalCancelarMovimentacao } from "../../components/ModalCancelarMovimentacao/modal";
 import ToastService from "../../components/alerts/ToastService";
+import { PainelDoVendedorFiltro } from "../../models/PainelDoVendedorFiltro";
 
 interface CardMovimentacaoProps {
-  item: PainelDoVendedorDto;
+  item: PainelDoVendedor;
   onCancel: () => void;
 }
 
@@ -58,7 +58,7 @@ export default function Painel() {
 
   const [showFilters, setShowFilters] = useState(false);
   const [loadingPainel, setLoadingPainel] = useState(false);
-  const [dados, setDados] = useState<PainelDoVendedorDto[]>([]);
+  const [dados, setDados] = useState<PainelDoVendedor[]>([]);
 
   const PAGE_SIZE = 10;
 
@@ -70,7 +70,7 @@ export default function Painel() {
   const [empresaId, setEmpresaId] = useState<number | null>(null);
   const [nomeEmpresa, setNomeEmpresa] = useState("");
 
-  const [cancelarItem, setCancelarItem] = useState<PainelDoVendedorDto | null>(
+  const [cancelarItem, setCancelarItem] = useState<PainelDoVendedor | null>(
     null,
   );
   const [motivoCancelamento, setMotivoCancelamento] = useState("");
