@@ -23,7 +23,7 @@ import { useLookupsEstoque } from "../../contexts/LookupEstoqueContext";
 import Button from "../../components/Button";
 
 import { estoqueService } from "../../services/estoqueService";
-import { EstoqueFiltro } from "../../models/EstoqueFiltro";
+import { EstoqueFiltro } from "../../models/estoqueFiltro";
 import { EstoqueRetorno } from "../../models/estoqueRetorno";
 
 interface Veiculo {

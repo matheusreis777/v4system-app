@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,10 +9,10 @@ import {
 import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 interface HeaderProps {
   title: string;
-  empresa?: string;
 
   leftIcon?: keyof typeof Feather.glyphMap;
   onLeftPress?: () => void;
@@ -25,12 +25,21 @@ interface HeaderProps {
 
 export default function Header({
   title,
-  empresa,
   leftIcon,
   onLeftPress,
   rightIcons = [],
 }: HeaderProps) {
   const insets = useSafeAreaInsets();
+  const [empresa, setEmpresa] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function carregarEmpresa() {
+      const nomeEmpresa = await AsyncStorage.getItem("@nameempresa");
+      setEmpresa(nomeEmpresa);
+    }
+
+    carregarEmpresa();
+  }, []);
 
   return (
     <LinearGradient
@@ -54,7 +63,7 @@ export default function Header({
           )}
         </View>
 
-        {/* CENTRO (TÍTULO + SUBTÍTULO) */}
+        {/* CENTRO */}
         <View style={styles.center}>
           {empresa && (
             <Text style={styles.subtitle} numberOfLines={1}>
@@ -88,15 +97,12 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 22,
     borderBottomRightRadius: 22,
 
-    // sombra iOS
     shadowColor: "#000",
     shadowOpacity: 0.25,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 6 },
 
-    // sombra Android
     elevation: Platform.OS === "android" ? 0 : 12,
-
     zIndex: 20,
   },
 

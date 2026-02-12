@@ -14,7 +14,7 @@ export default function Button({ title, ...rest }: Props) {
     button: {
       width: "100%",
       height: 48,
-      backgroundColor: theme.buttonBackground,
+      backgroundColor: "#1844a2",
       borderRadius: 8,
       justifyContent: "center",
       alignItems: "center",

@@ -1,6 +1,6 @@
 import { GenericService } from "./genericService";
-import { ResultadoConsulta } from "../models/ResultadoConsulta";
-import { EstoqueFiltro } from "../models/EstoqueFiltro";
+import { ResultadoConsulta } from "../models/resultadoConsulta";
+import { EstoqueFiltro } from "../models/estoqueFiltro";
 import { EstoqueRetorno } from "../models/estoqueRetorno";
 
 class EstoqueService extends GenericService<ResultadoConsulta<EstoqueRetorno>> {

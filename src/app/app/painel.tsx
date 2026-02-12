@@ -36,7 +36,7 @@ import {
   obterLabelTipoNegociacao,
 } from "../../utils/enums/enumLabels";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { ModalCancelarMovimentacao } from "../../components/ModalCancelarMovimentacao/modal";
 import ToastService from "../../components/alerts/ToastService";
@@ -68,7 +68,6 @@ export default function Painel() {
   const [loadingMais, setLoadingMais] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [empresaId, setEmpresaId] = useState<number | null>(null);
-  const [nomeEmpresa, setNomeEmpresa] = useState("");
 
   const [cancelarItem, setCancelarItem] = useState<PainelDoVendedor | null>(
     null,
@@ -129,9 +128,6 @@ export default function Painel() {
   useEffect(() => {
     async function carregarEmpresa() {
       const empresaIdStorage = await AsyncStorage.getItem("@empresaId");
-      const nomeEmpresa = await AsyncStorage.getItem("@nameempresa");
-
-      setNomeEmpresa(nomeEmpresa || "");
       setEmpresaId(empresaId);
 
       if (empresaIdStorage) {
@@ -251,7 +247,6 @@ export default function Painel() {
     <View style={styles.screen}>
       <Header
         title="Painel de Movimentações"
-        empresa={nomeEmpresa}
         leftIcon="chevron-left"
         onLeftPress={() => router.replace("/app/intro")}
         rightIcons={[
@@ -434,6 +429,10 @@ function safeLabel(label?: string | null) {
   return typeof label === "string" && label.trim().length > 0 ? label : null;
 }
 
+function irParaDetalhes(id: number) {
+  router.push(`/app/detalhesMovimentacao/${id}`);
+}
+
 function CardMovimentacao({ item, onCancel }: CardMovimentacaoProps) {
   const labelMomento = safeLabel(
     item.momentoId ? obterLabelMomento(item.momentoId) : null,
@@ -459,7 +458,10 @@ function CardMovimentacao({ item, onCancel }: CardMovimentacaoProps) {
         : "-";
 
   return (
-    <View style={styles.card}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={() => irParaDetalhes(item.movimentacaoId)}
+    >
       <View style={styles.cardHeader}>
         <Text style={styles.cardTitle}>{item.clienteNome ?? "Cliente"}</Text>
       </View>
@@ -508,7 +510,7 @@ function CardMovimentacao({ item, onCancel }: CardMovimentacaoProps) {
           </TouchableOpacity>
         )}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
