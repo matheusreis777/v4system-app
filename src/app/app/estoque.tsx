@@ -25,6 +25,7 @@ import Button from "../../components/Button";
 import { estoqueService } from "../../services/estoqueService";
 import { EstoqueFiltro } from "../../models/estoqueFiltro";
 import { EstoqueRetorno } from "../../models/estoqueRetorno";
+import { useRef } from "react";
 
 interface Veiculo {
   id: number;
@@ -54,6 +55,7 @@ export default function Estoque() {
   const [loadingInicial, setLoadingInicial] = useState(true);
   const [loadingMais, setLoadingMais] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const loadingMoreRef = useRef(false);
 
   const { tipoVeiculo, marca, modelo, statusVeiculo, reload } =
     useLookupsEstoque();
@@ -95,7 +97,6 @@ export default function Estoque() {
 
   async function carregarPagina(pagina: number, append = false) {
     if (!filters.empresaId) return;
-    if (append && loadingMais) return;
 
     append ? setLoadingMais(true) : setLoadingInicial(true);
 
@@ -129,11 +130,11 @@ export default function Estoque() {
         km: v.quilometragem ?? 0,
         cor: v.corNome ?? "",
         combustivel: String(v.combustivelNome ?? ""),
-        valorVenda: v.resumoGeral.valorVenda ?? 0,
+        valorVenda: v.resumoGeral?.valorVenda ?? 0, // ✅ proteção
       }));
 
       setHasMore(mapped.length === PAGE_SIZE);
-      setPage(pagina);
+
       setVeiculos((prev) => (append ? [...prev, ...mapped] : mapped));
 
       if (!append && mapped.length === 0) {
@@ -150,6 +151,7 @@ export default function Estoque() {
       setLoadingInicial(false);
       setLoadingMais(false);
       setRefreshing(false);
+      loadingMoreRef.current = false; // ✅ libera nova chamada
     }
   }
 
@@ -206,9 +208,16 @@ export default function Estoque() {
   }
 
   const carregarMaisAutomatico = useCallback(() => {
-    if (!hasMore || loadingMais || loadingInicial) return;
-    carregarPagina(page + 1, true);
-  }, [page, hasMore, loadingMais, loadingInicial]);
+    if (loadingMoreRef.current || !hasMore || loadingInicial) return;
+
+    loadingMoreRef.current = true;
+
+    setPage((prev) => {
+      const next = prev + 1;
+      carregarPagina(next, true);
+      return next;
+    });
+  }, [hasMore, loadingInicial]);
 
   function renderVeiculo({ item }: { item: Veiculo }) {
     return (
@@ -263,7 +272,7 @@ export default function Estoque() {
 
   return (
     <View style={styles.screen}>
-      <Header title="Listagem de Veículos" empresa={nomeEmpresa} />
+      <Header title="Listagem de Veículos" />
 
       <View style={styles.filtersHeader}>
         <TouchableOpacity
@@ -375,14 +384,14 @@ export default function Estoque() {
           <FlatList
             data={veiculos}
             keyExtractor={(item) => String(item.id)}
+            onEndReached={carregarMaisAutomatico}
+            onEndReachedThreshold={0.2}
             renderItem={renderVeiculo}
             refreshing={refreshing}
             onRefresh={() => {
               setRefreshing(true);
               resetAndLoad();
             }}
-            onEndReached={carregarMaisAutomatico}
-            onEndReachedThreshold={0.4}
             ListEmptyComponent={loadingInicial ? null : EmptyList}
             ListFooterComponent={
               loadingMais ? (
