@@ -7,7 +7,6 @@ const tabs = [
   { label: "Painel", route: "/app/painel", icon: "painel" },
   { label: "Estoque", route: "/app/estoque", icon: "estoque" },
   { label: "Clientes", route: "/app/cliente", icon: "clientes" },
-  { label: "Checklist", route: "/app/checklist", icon: "checklist" },
   { label: "Perfil", route: "/app/perfil", icon: "perfil" },
 ];
 
@@ -22,8 +21,6 @@ function renderIcon(name: string, active: boolean) {
       return <FontAwesome name="car" size={size} color={color} />;
     case "clientes":
       return <Feather name="users" size={size} color={color} />;
-    case "checklist":
-      return <Feather name="check-square" size={size} color={color} />;
     case "perfil":
       return <Feather name="user" size={size} color={color} />;
     default:

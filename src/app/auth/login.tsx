@@ -21,6 +21,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Button from "../../components/Button";
 import { useLoading } from "../../contexts/LoadingContext";
 import { router } from "expo-router";
+import { login } from "../../services/authService";
 
 export default function Index() {
   const { theme } = useTheme();
@@ -79,6 +80,7 @@ export default function Index() {
       }
 
       await AsyncStorage.setItem("@telefone", loginData.telefone.toString());
+      await AsyncStorage.setItem("@perfil", loginData.usuarioPerfilDescricao);
 
       if (loginData.empresas?.length === 1) {
         await AsyncStorage.setItem(

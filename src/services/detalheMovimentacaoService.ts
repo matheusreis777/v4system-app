@@ -19,6 +19,10 @@ interface DetalheMovimentacaoDto {
   cliente: string;
   terceiros: string[];
   historicoMovimentacao: string[];
+  formasPagamento: string[];
+  aprovacaoGestor: string;
+  aprovacaoFinanceiro: string;
+  mostrarAprovacoes: boolean;
 }
 
 class DetalheMovimentacaoService extends GenericService<
@@ -45,6 +49,10 @@ class DetalheMovimentacaoService extends GenericService<
       cliente: item.cliente,
       terceiros: item.terceiros,
       historicoMovimentacao: item.historicoMovimentacao,
+      formasPagamento: item.formasPagamento,
+      aprovacaoGestor: item.aprovacaoGestor,
+      aprovacaoFinanceiro: item.aprovacaoFinanceiro,
+      mostrarAprovacoes: item.mostrarAprovacoes,
     }));
   }
 }

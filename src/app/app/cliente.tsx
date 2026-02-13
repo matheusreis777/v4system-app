@@ -109,8 +109,6 @@ export default function Cliente() {
       const response = await clienteService.consultar(filtro);
       const lista = response.data.lista ?? [];
 
-      console.log(lista[0]);
-
       const mapped: Cliente[] = lista.map((v: any) => ({
         id: v.id,
         nome: v.nome,

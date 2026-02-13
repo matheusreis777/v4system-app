@@ -4,12 +4,17 @@ import { useEffect, useState } from "react";
 import Header from "../../../components/Header/Header";
 import { detalheMovimentacaoService } from "../../../services/detalheMovimentacaoService";
 import { maskData, maskPhone } from "../../../utils/masks";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import Button from "../../../components/Button";
+import { aprovacoesMovimentacaoService } from "../../../services/aprovacaoService";
+import ToastService from "../../../components/alerts/ToastService";
 
 export default function DetalhesMovimentacao() {
   const { id } = useLocalSearchParams<{ id: string }>();
 
   const [detalhes, setDetalhes] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  var [perfil, setPerfil] = useState<string>("");
 
   async function carregarDetalhes(idNumber: number) {
     try {
@@ -19,6 +24,13 @@ export default function DetalhesMovimentacao() {
         setDetalhes(response[0]);
       } else {
         setDetalhes(null);
+      }
+
+      const perfilStorage = await AsyncStorage.getItem("@perfil");
+
+      if (perfilStorage) {
+        setPerfil(perfilStorage);
+        perfil = perfilStorage;
       }
     } catch (error) {
       console.error("Erro ao buscar detalhes:", error);
@@ -67,6 +79,54 @@ export default function DetalhesMovimentacao() {
         </View>
       </View>
     );
+  }
+
+  async function aprovarGestor() {
+    if (!detalhes?.id) return;
+
+    try {
+      const response = await aprovacoesMovimentacaoService.aprovarGestor(
+        detalhes.id,
+      );
+
+      if (response == null || !response) {
+        ToastService.error(
+          "Erro ao aprovar gestor. Por favor, tente novamente.",
+        );
+        return;
+      }
+
+      if (response) {
+        ToastService.success("Aprovação do gestor realizada com sucesso!");
+        carregarDetalhes(detalhes.id);
+      }
+    } catch (error) {
+      console.error("Erro ao aprovar gestor:", error);
+    }
+  }
+
+  async function aprovarFinanceiro() {
+    if (!detalhes?.id) return;
+
+    try {
+      const response = await aprovacoesMovimentacaoService.aprovarFinanceiro(
+        detalhes.id,
+      );
+
+      if (response == null || !response) {
+        ToastService.error(
+          "Erro ao aprovar financeiro. Por favor, tente novamente.",
+        );
+        return;
+      }
+
+      if (response) {
+        ToastService.success("Aprovação do financeiro realizada com sucesso!");
+        carregarDetalhes(detalhes.id);
+      }
+    } catch (error) {
+      console.error("Erro ao aprovar financeiro:", error);
+    }
   }
 
   // ---------- UI ----------
@@ -140,15 +200,50 @@ export default function DetalhesMovimentacao() {
           {renderLinhaTabela(detalhes?.cliente)}
         </View>
 
-        {/* TERCEIROS */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Terceiros</Text>
+          <Text style={styles.sectionTitle}>Fechamento</Text>
 
-          {(detalhes?.terceiros?.length ?? 0) > 0
-            ? detalhes.terceiros.map((t: string, i: number) => (
-                <View key={i}>{renderLinhaTabela(t)}</View>
+          <Text style={styles.subTitle}>Formas de Pagamentos</Text>
+          {(detalhes?.formasPagamento?.length ?? 0) > 0
+            ? detalhes.formasPagamento.map((f: string, i: number) => (
+                <View key={i}>{renderLinhaTabela(f)}</View>
               ))
             : renderLinhaTabela("-")}
+
+          {perfil === "Administrador" && (
+            <>
+              {detalhes?.mostrarAprovacoes && (
+                <>
+                  <Text style={styles.subTitle}>Aprovações {perfil}</Text>
+
+                  <View style={styles.rowBetween}>
+                    {renderCampo("Gestor", detalhes?.aprovacaoGestor)}
+                    {renderCampo("Financeiro", detalhes?.aprovacaoFinanceiro)}
+                  </View>
+
+                  <View style={styles.rowBetween}>
+                    {detalhes?.aprovacaoGestor != "Aprovado" && (
+                      <View style={styles.buttonWrapper}>
+                        <Button
+                          title="Aprovar Gestor"
+                          onPress={() => aprovarGestor()}
+                        />
+                      </View>
+                    )}
+
+                    {detalhes?.aprovacaoFinanceiro != "Aprovado" && (
+                      <View style={styles.buttonWrapper}>
+                        <Button
+                          title="Aprovar Financeiro"
+                          onPress={() => aprovarFinanceiro()}
+                        />
+                      </View>
+                    )}
+                  </View>
+                </>
+              )}
+            </>
+          )}
         </View>
 
         {/* HISTÓRICO */}
@@ -235,6 +330,10 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderBottomWidth: 1,
     borderColor: "#eee",
+  },
+
+  buttonWrapper: {
+    flex: 1,
   },
 
   tableText: {
