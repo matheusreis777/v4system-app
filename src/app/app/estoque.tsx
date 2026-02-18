@@ -26,6 +26,7 @@ import { estoqueService } from "../../services/estoqueService";
 import { EstoqueFiltro } from "../../models/estoqueFiltro";
 import { EstoqueRetorno } from "../../models/estoqueRetorno";
 import { useRef } from "react";
+import { router } from "expo-router";
 
 interface Veiculo {
   id: number;
@@ -207,6 +208,21 @@ export default function Estoque() {
     resetAndLoad();
   }
 
+  function irParaChecklist(
+    veiculoId: number,
+    empresaId: number,
+    dadosVeiculos: Veiculo,
+  ) {
+    router.push({
+      pathname: "/app/dadosVeiculo",
+      params: {
+        veiculoId: veiculoId.toString(),
+        empresaId: empresaId.toString(),
+        dadosVeiculos: JSON.stringify(dadosVeiculos),
+      },
+    });
+  }
+
   const carregarMaisAutomatico = useCallback(() => {
     if (loadingMoreRef.current || !hasMore || loadingInicial) return;
 
@@ -221,52 +237,59 @@ export default function Estoque() {
 
   function renderVeiculo({ item }: { item: Veiculo }) {
     return (
-      <View style={styles.card}>
-        <View style={styles.cardTop}>
-          <Text style={styles.placa}>{maskPlate(item.placa)}</Text>
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>{item.statusVeiculo}</Text>
+      <TouchableOpacity
+        style={styles.card}
+        onPress={() => irParaChecklist(item.id, empresaId ?? 0, item)}
+      >
+        <View style={styles.card}>
+          <View style={styles.cardTop}>
+            <Text style={styles.placa}>{maskPlate(item.placa)}</Text>
+            <View style={styles.statusBadge}>
+              <Text style={styles.statusText}>{item.statusVeiculo}</Text>
+            </View>
+          </View>
+
+          <Text style={styles.title}>
+            {item.tipoVeiculo} • {item.marca} {item.modelo}
+          </Text>
+
+          <View style={styles.infoGrid}>
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Ano</Text>
+              <Text style={styles.infoValue}>
+                {item.anoModelo}/{item.anoFabricacao}
+              </Text>
+            </View>
+
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>KM</Text>
+              <Text style={styles.infoValue}>
+                {item.km.toLocaleString()} km
+              </Text>
+            </View>
+
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Cor</Text>
+              <Text style={styles.infoValue}>{item.cor}</Text>
+            </View>
+
+            <View style={styles.infoItem}>
+              <Text style={styles.infoLabel}>Combustível</Text>
+              <Text style={styles.infoValue}>{item.combustivel}</Text>
+            </View>
+
+            <View style={styles.infoItemValor}>
+              <Text style={styles.infoLabel}>Valor Venda</Text>
+              <Text style={styles.infoValue}>
+                R${" "}
+                {item.valorVenda?.toLocaleString("pt-BR", {
+                  minimumFractionDigits: 2,
+                })}
+              </Text>
+            </View>
           </View>
         </View>
-
-        <Text style={styles.title}>
-          {item.tipoVeiculo} • {item.marca} {item.modelo}
-        </Text>
-
-        <View style={styles.infoGrid}>
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Ano</Text>
-            <Text style={styles.infoValue}>
-              {item.anoModelo}/{item.anoFabricacao}
-            </Text>
-          </View>
-
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>KM</Text>
-            <Text style={styles.infoValue}>{item.km.toLocaleString()} km</Text>
-          </View>
-
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Cor</Text>
-            <Text style={styles.infoValue}>{item.cor}</Text>
-          </View>
-
-          <View style={styles.infoItem}>
-            <Text style={styles.infoLabel}>Combustível</Text>
-            <Text style={styles.infoValue}>{item.combustivel}</Text>
-          </View>
-
-          <View style={styles.infoItemValor}>
-            <Text style={styles.infoLabel}>Valor Venda</Text>
-            <Text style={styles.infoValue}>
-              R${" "}
-              {item.valorVenda?.toLocaleString("pt-BR", {
-                minimumFractionDigits: 2,
-              })}
-            </Text>
-          </View>
-        </View>
-      </View>
+      </TouchableOpacity>
     );
   }
 
