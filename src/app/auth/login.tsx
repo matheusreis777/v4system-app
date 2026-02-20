@@ -22,15 +22,19 @@ import Button from "../../components/Button";
 import { useLoading } from "../../contexts/LoadingContext";
 import { router } from "expo-router";
 import { pushService } from "../../services/pushService";
+
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
+import Constants from "expo-constants";
 
 export default function Index() {
   const { theme } = useTheme();
   const { signIn } = useAuth();
+
   const [cpf, setCpf] = useState("");
   const [senha, setPassword] = useState("");
   const [stayConnected, setStayConnected] = useState(false);
+
   const { showLoading, hideLoading } = useLoading();
   const [empresas, setEmpresas] = useState<any[]>([]);
 
@@ -50,8 +54,6 @@ export default function Index() {
 
   const loadSavedCredentials = async () => {
     try {
-      await AsyncStorage.setItem("@login", cpf);
-
       const savedCpf = await AsyncStorage.getItem("@savedCpf");
       const savedSenha = await AsyncStorage.getItem("@savedSenha");
 
@@ -65,21 +67,36 @@ export default function Index() {
     }
   };
 
+  // ✅ FUNÇÃO SEGURA PARA PEGAR PUSH TOKEN
   async function getPushToken() {
-    if (!Device.isDevice) {
-      alert("Use um celular físico");
-      return;
+    try {
+      // 🚫 Não roda no Expo Go
+      if (Constants.appOwnership === "expo") {
+        console.log("Push não disponível no Expo Go");
+        return null;
+      }
+
+      if (!Device.isDevice) {
+        Alert.alert("Push", "Use um celular físico para notificações");
+        return null;
+      }
+
+      const { status } = await Notifications.requestPermissionsAsync();
+
+      if (status !== "granted") {
+        console.log("Permissão de notificação negada");
+        return null;
+      }
+
+      const token = (await Notifications.getExpoPushTokenAsync()).data;
+
+      console.log("PUSH TOKEN:", token);
+
+      return token;
+    } catch (error) {
+      console.log("Erro ao obter push token:", error);
+      return null;
     }
-
-    const { status } = await Notifications.requestPermissionsAsync();
-
-    if (status !== "granted") {
-      alert("Permissão negada para notificações");
-      return;
-    }
-
-    const token = (await Notifications.getExpoPushTokenAsync()).data;
-    return token;
   }
 
   const loginScreen = async () => {
@@ -98,6 +115,7 @@ export default function Index() {
         throw new Error("Login sem retorno");
       }
 
+      // ✅ SALVA DADOS DO USUÁRIO
       await AsyncStorage.setItem("@telefone", loginData.telefone.toString());
       await AsyncStorage.setItem("@perfil", loginData.usuarioPerfilDescricao);
       await AsyncStorage.setItem("@usuarioId", loginData.usuarioId.toString());
@@ -109,18 +127,27 @@ export default function Index() {
         );
       }
 
-      const token = await getPushToken();
+      // ✅ PUSH NÃO PODE QUEBRAR O LOGIN
+      try {
+        const token = await getPushToken();
 
-      if (token) {
-        await pushService.salvar({
-          usuarioId: loginData.usuarioId,
-          pushToken: token,
-          plataforma: Platform.OS,
-        });
+        if (token) {
+          await pushService.salvar({
+            usuarioId: loginData.usuarioId,
+            pushToken: token,
+            plataforma: Platform.OS,
+          });
+
+          console.log("Push token salvo com sucesso");
+        }
+      } catch (pushError) {
+        console.log("Erro ao registrar push:", pushError);
       }
 
+      // ✅ NAVEGA MESMO SE O PUSH FALHAR
       router.replace("/app/intro");
     } catch (error) {
+      console.log("ERRO LOGIN:", error);
       Alert.alert("Falha no login", "Verifique suas credenciais.");
     } finally {
       hideLoading();
@@ -130,13 +157,12 @@ export default function Index() {
   return (
     <ImageBackground
       source={require("../../../assets/background.png")}
-      style={[styles.container]}
+      style={styles.container}
       resizeMode="cover"
     >
       <KeyboardAvoidingView
         style={{ flex: 1, width: "100%" }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
-        keyboardVerticalOffset={Platform.OS === "ios" ? 20 : 0}
       >
         <ScrollView
           contentContainerStyle={{
@@ -148,12 +174,13 @@ export default function Index() {
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
-          <View style={[styles.card]}>
+          <View style={styles.card}>
             <Image
               source={require("../../../assets/logo-v4system.png")}
               style={styles.logo}
               resizeMode="contain"
             />
+
             <Text style={styles.subtitle}>Sistema de Gestão CRM</Text>
 
             <Input
@@ -161,7 +188,7 @@ export default function Index() {
               placeholder="CPF"
               type="cpf"
               value={cpf}
-              onChangeText={(text) => setCpf(text)}
+              onChangeText={setCpf}
               keyboardType="numeric"
             />
 
@@ -169,7 +196,7 @@ export default function Index() {
               label="Senha"
               placeholder="Senha"
               value={senha}
-              onChangeText={(text) => setPassword(text)}
+              onChangeText={setPassword}
               isPassword
             />
 
@@ -188,7 +215,7 @@ export default function Index() {
             <Button title="Entrar" onPress={loginScreen} />
 
             <TouchableOpacity onPress={() => router.push("/auth/forgot")}>
-              <Text style={[styles.forgot]}>Esqueci minha senha</Text>
+              <Text style={styles.forgot}>Esqueci minha senha</Text>
             </TouchableOpacity>
           </View>
 
@@ -203,17 +230,13 @@ export default function Index() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1, // fallback caso a imagem demore
-    justifyContent: "center",
-    alignItems: "center",
+    flex: 1,
   },
-
   logo: {
     width: 200,
     height: 40,
     marginBottom: 4,
   },
-
   card: {
     width: "100%",
     maxWidth: 380,
@@ -222,17 +245,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     alignItems: "center",
     backgroundColor: "#ffffff",
-
-    // sombra iOS
     shadowColor: "#000",
     shadowOpacity: 0.09,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
-
-    // sombra Android
     elevation: 9,
   },
-
   subtitle: {
     fontSize: 14,
     color: "#545455",
@@ -240,23 +258,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: Fonts.medium,
   },
-
   forgot: {
     marginTop: 20,
     color: "#2563EB",
     fontSize: 16,
     fontFamily: Fonts.regular,
   },
-
   footer: {
     marginTop: 28,
     fontSize: 12,
-  },
-
-  toggleButton: {
-    marginTop: 20,
-    marginBottom: 20,
-    textAlign: "right",
   },
   switchRow: {
     flexDirection: "row",

@@ -1,39 +1,41 @@
-{
-  "expo": {
-    "name": "V4 System",
-    "slug": "v4system-app",
-    "scheme": "v4system",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "newArchEnabled": true,
-    "splash": {
-      "image": "./assets/splash-icon.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "package": "com.v4system.crm",
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+  {
+    "expo": {
+      "name": "V4 System",
+      "slug": "v4system-app",
+      "scheme": "v4system",
+      "version": "1.0.0",
+      "orientation": "portrait",
+      "icon": "./assets/icon.png",
+      "userInterfaceStyle": "light",
+      "newArchEnabled": true,
+      "splash": {
+        "image": "./assets/splash-icon.png",
+        "resizeMode": "contain",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "softwareKeyboardLayoutMode": "resize"
-    },
-    "plugins": [
-      "expo-secure-store",
-      "expo-font",
-      "expo-router"
-    ],
-    "extra": {
-      "eas": {
-        "projectId": "5d4fd711-b2ad-4bf8-9a9f-78303b0a92b8"
+      "ios": {
+        "supportsTablet": true
+      },
+      "android": {
+  "package": "com.v4system.crm",
+  "adaptiveIcon": {
+    "foregroundImage": "./assets/adaptive-icon.png",
+    "backgroundColor": "#ffffff"
+  },
+  "edgeToEdgeEnabled": true,
+  "softwareKeyboardLayoutMode": "resize",
+  "permissions": ["INTERNET"],
+  "usesCleartextTraffic": true
+},
+      "plugins": [
+        "expo-secure-store",
+        "expo-font",
+        "expo-router"
+      ],
+      "extra": {
+        "eas": {
+          "projectId": "5d4fd711-b2ad-4bf8-9a9f-78303b0a92b8"
+        }
       }
     }
   }
-}
