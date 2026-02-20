@@ -21,7 +21,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Button from "../../components/Button";
 import { useLoading } from "../../contexts/LoadingContext";
 import { router } from "expo-router";
-import { login } from "../../services/authService";
+import { pushService } from "../../services/pushService";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
 
 export default function Index() {
   const { theme } = useTheme();
@@ -63,6 +65,23 @@ export default function Index() {
     }
   };
 
+  async function getPushToken() {
+    if (!Device.isDevice) {
+      alert("Use um celular físico");
+      return;
+    }
+
+    const { status } = await Notifications.requestPermissionsAsync();
+
+    if (status !== "granted") {
+      alert("Permissão negada para notificações");
+      return;
+    }
+
+    const token = (await Notifications.getExpoPushTokenAsync()).data;
+    return token;
+  }
+
   const loginScreen = async () => {
     if (!cpf || !senha) {
       Alert.alert("Atenção", "Preencha CPF e senha.");
@@ -81,18 +100,27 @@ export default function Index() {
 
       await AsyncStorage.setItem("@telefone", loginData.telefone.toString());
       await AsyncStorage.setItem("@perfil", loginData.usuarioPerfilDescricao);
+      await AsyncStorage.setItem("@usuarioId", loginData.usuarioId.toString());
 
-      if (loginData.empresas?.length === 1) {
+      if (loginData.usuarioPerfilDescricao === "Vendedor") {
         await AsyncStorage.setItem(
-          "@empresaSelecionada",
-          JSON.stringify(loginData.empresas[0]),
+          "@vendedorId",
+          loginData.usuarioId.toString(),
         );
-        router.replace("/app/painel");
-      } else {
-        router.replace("/app/intro");
       }
+
+      const token = await getPushToken();
+
+      if (token) {
+        await pushService.salvar({
+          usuarioId: loginData.usuarioId,
+          pushToken: token,
+          plataforma: Platform.OS,
+        });
+      }
+
+      router.replace("/app/intro");
     } catch (error) {
-      console.log("ERRO LOGIN:", error);
       Alert.alert("Falha no login", "Verifique suas credenciais.");
     } finally {
       hideLoading();

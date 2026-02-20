@@ -46,9 +46,7 @@ export default function Perfil() {
           telefone: telefone ?? "",
         });
       }
-    } catch (error) {
-      console.log("Erro ao carregar usuário:", error);
-    }
+    } catch (error) {}
   }
 
   async function handleLogout() {

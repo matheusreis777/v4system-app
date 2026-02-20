@@ -40,7 +40,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { ModalCancelarMovimentacao } from "../../components/ModalCancelarMovimentacao/modal";
 import ToastService from "../../components/alerts/ToastService";
-import { PainelDoVendedorFiltro } from "../../models/PainelDoVendedorFiltro";
+import { PainelDoVendedorFiltro } from "../../models/painelDoVendedorFiltro";
 
 interface CardMovimentacaoProps {
   item: PainelDoVendedor;
@@ -68,6 +68,7 @@ export default function Painel() {
   const [loadingMais, setLoadingMais] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [empresaId, setEmpresaId] = useState<number | null>(null);
+  const [tipoPerfil, setTipoPerfil] = useState<string | null>(null);
 
   const [cancelarItem, setCancelarItem] = useState<PainelDoVendedor | null>(
     null,
@@ -93,6 +94,16 @@ export default function Painel() {
     append ? setLoadingMais(true) : setLoadingInicial(true);
 
     try {
+      var tipoPerfil = await AsyncStorage.getItem("@perfil");
+      setTipoPerfil(tipoPerfil);
+      if (tipoPerfil === "Vendedor") {
+        const vendedorIdStorage = await AsyncStorage.getItem("@vendedorId");
+        setFilters((prev) => ({
+          ...prev,
+          vendedorId: Number(vendedorIdStorage),
+        }));
+      }
+
       const filtro: PainelDoVendedorFiltro = {
         EmpresaId: filters.empresaId,
         StatusMovimentacaoId: filters.statusId,
@@ -128,12 +139,19 @@ export default function Painel() {
   useEffect(() => {
     async function carregarEmpresa() {
       const empresaIdStorage = await AsyncStorage.getItem("@empresaId");
+      const tipoPerfil = await AsyncStorage.getItem("@perfil");
+      const vendedorIdStorage = await AsyncStorage.getItem("@vendedorId");
+
       setEmpresaId(empresaId);
 
       if (empresaIdStorage) {
         setFilters((prev) => ({
           ...prev,
           empresaId: Number(empresaIdStorage),
+          vendedorId:
+            tipoPerfil === "Vendedor" && vendedorIdStorage
+              ? Number(vendedorIdStorage)
+              : prev.vendedorId,
         }));
       }
     }
@@ -312,12 +330,16 @@ export default function Painel() {
                 }
               />
 
-              <FilterDropdown
-                label="Vendedor"
-                options={vendedores}
-                value={filters.vendedorId}
-                onChange={(id) => setFilters((p) => ({ ...p, vendedorId: id }))}
-              />
+              {tipoPerfil !== "Vendedor" && (
+                <FilterDropdown
+                  label="Vendedor"
+                  options={vendedores}
+                  value={filters.vendedorId}
+                  onChange={(id) =>
+                    setFilters((p) => ({ ...p, vendedorId: id }))
+                  }
+                />
+              )}
 
               <Text style={styles.inputLabel}>Placa</Text>
               <Input

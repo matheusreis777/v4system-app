@@ -70,16 +70,8 @@ export class GenericService<TResponse = any> {
         config,
       );
 
-      /* console.log("STATUS:", response.status);
-      console.log("RESPONSE:", response.data); */
-
       return response;
     } catch (error: any) {
-      /* console.log("❌ ERRO POST");
-      console.log("STATUS:", error?.response?.status);
-      console.log("DATA:", error?.response?.data);
-      console.log("HEADERS:", error?.response?.headers);
-      console.log("MESSAGE:", error?.message); */
       throw error;
     }
   }

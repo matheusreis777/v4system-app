@@ -67,7 +67,6 @@ export default function Checklist() {
 
         setQuestionarios(resposta);
       } catch (error) {
-        console.log("ERRO API:", error);
       } finally {
         setLoading(false);
       }

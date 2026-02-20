@@ -88,6 +88,7 @@ export default function NovoLead() {
         cpfCnpj: cpfCnpj ? apenasNumeros(cpfCnpj) : "",
         observacao,
         empresaId: Number(await AsyncStorage.getItem("@empresaId")),
+        vendedorId: Number(await AsyncStorage.getItem("@vendedorId")),
       });
 
       if (response.status !== 200) {

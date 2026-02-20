@@ -6,6 +6,7 @@ interface NovoLeadDTO {
   cpfCnpj?: string;
   observacao: string;
   empresaId: number;
+  vendedorId?: number;
 }
 
 class NovoLeadService extends GenericService {

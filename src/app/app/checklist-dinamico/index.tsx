@@ -30,8 +30,6 @@ export default function ChecklistDinamico() {
       try {
         setLoading(true);
 
-        console.log("Carregando checklist para:", params);
-
         const avaliacao = await avaliacaoService.obterAvaliacaoPorVeiculo(
           Number(params.veiculoId),
           Number(params.empresaId),
@@ -51,18 +49,13 @@ export default function ChecklistDinamico() {
           }),
         );
 
-        console.log(params.codigo);
-
         const teste = await questionarioService.listaQuestionarioDinamico(
           Number(params.codigo),
           Number(params.empresaId),
         );
 
-        console.log(teste);
-
         setChecklist(lista);
       } catch (error) {
-        console.log("ERRO API:", error);
         Alert.alert("Erro", "Não foi possível carregar o checklist");
       } finally {
         setLoading(false);
