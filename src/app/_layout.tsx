@@ -9,41 +9,62 @@ import { LookupProviderEstoque } from "../contexts/LookupEstoqueContext";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import { useEffect } from "react";
+import { Platform } from "react-native";
+import Constants from "expo-constants";
 
-// ✅ TEM QUE FICAR FORA DO COMPONENTE
+// ✅ HANDLER (fora do componente)
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
-
-    // 👇 NOVO (obrigatório nas versões recentes)
     shouldShowBanner: true,
     shouldShowList: true,
   }),
 });
 
-async function getPushToken() {
-  if (!Device.isDevice) {
-    alert("Use um celular físico");
-    return;
-  }
-
-  const { status } = await Notifications.requestPermissionsAsync();
-
-  if (status !== "granted") {
-    alert("Permissão negada para notificações");
-    return;
-  }
-
-  const token = (await Notifications.getExpoPushTokenAsync()).data;
-}
-
 export default function RootLayout() {
-  // ✅ PEGA O TOKEN QUANDO O APP ABRE
   useEffect(() => {
-    getPushToken();
+    configurarPush();
   }, []);
+
+  async function configurarPush() {
+    try {
+      if (!Device.isDevice) {
+        console.log("Use um dispositivo físico");
+        return;
+      }
+
+      // ✅ ANDROID → CRIA CHANNEL (OBRIGATÓRIO)
+      if (Platform.OS === "android") {
+        await Notifications.setNotificationChannelAsync("default", {
+          name: "default",
+          importance: Notifications.AndroidImportance.MAX,
+          vibrationPattern: [0, 250, 250, 250],
+          lightColor: "#FF231F7C",
+        });
+      }
+
+      // ✅ PERMISSÃO
+      const { status } = await Notifications.requestPermissionsAsync();
+
+      if (status !== "granted") {
+        console.log("Permissão de notificação negada");
+        return;
+      }
+
+      // ✅ TOKEN CORRETO PARA APK / EAS
+      const token = (
+        await Notifications.getExpoPushTokenAsync({
+          projectId: Constants.easConfig?.projectId,
+        })
+      ).data;
+
+      console.log("✅ PUSH TOKEN:", token);
+    } catch (error) {
+      console.log("❌ Erro ao configurar push:", error);
+    }
+  }
 
   return (
     <ThemeProvider>
