@@ -8,10 +8,10 @@ import {
   ActivityIndicator,
   ScrollView,
   Platform,
+  Pressable,
 } from "react-native";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../../components/Header/Header";
 import BottomTab from "../../components/BottomTab/BottomTab";
 import { Feather } from "@expo/vector-icons";
@@ -86,35 +86,54 @@ export default function Painel() {
     empresaId: undefined as number | undefined,
   });
 
-  async function carregarPagina(pagina: number, append = false) {
-    if (!filters.empresaId) return;
+  const requestLock = useRef(false);
+  const cache = useRef(new Map());
 
-    if (append && loadingMais) return;
+  const renderItem = useCallback(
+    ({ item }: { item: PainelDoVendedor }) => (
+      <CardMovimentacao
+        item={item}
+        onCancel={() => {
+          setCancelarItem(item);
+          setMotivoCancelamento("");
+        }}
+      />
+    ),
+    [],
+  );
 
+  async function carregarPagina(
+    pagina: number,
+    append = false,
+    filtrosOverride?: typeof filters,
+  ) {
+    const f = filtrosOverride ?? filters;
+
+    if (!f.empresaId || requestLock.current) return;
+
+    const key = JSON.stringify({ ...f, pagina });
+
+    if (cache.current.has(key)) {
+      const cached = cache.current.get(key);
+      setDados((prev) => (pagina === 1 ? cached : [...prev, ...cached]));
+      setPage(pagina);
+      setHasMore(cached.length === PAGE_SIZE);
+      return;
+    }
+
+    requestLock.current = true;
     append ? setLoadingMais(true) : setLoadingInicial(true);
 
     try {
-      var tipoPerfil = await AsyncStorage.getItem("@perfil");
-      setTipoPerfil(tipoPerfil);
-      if (tipoPerfil === "Vendedor") {
-        const vendedorIdStorage = await AsyncStorage.getItem("@vendedorId");
-        setFilters((prev) => ({
-          ...prev,
-          vendedorId: Number(vendedorIdStorage),
-        }));
-      }
-
       const filtro: PainelDoVendedorFiltro = {
-        EmpresaId: filters.empresaId,
-        StatusMovimentacaoId: filters.statusId,
-        MomentoId: filters.momentoId,
-        TipoNegociacaoId: filters.tipoNegociacaoId,
-        VendedorId: filters.vendedorId ? filters.vendedorId : undefined,
-        Placa: filters.placa || undefined,
-        Nome: filters.cliente || undefined,
-        Telefone: filters.telefone
-          ? filters.telefone.replace(/\D/g, "")
-          : undefined,
+        EmpresaId: Number(f.empresaId),
+        StatusMovimentacaoId: f.statusId,
+        MomentoId: f.momentoId,
+        TipoNegociacaoId: f.tipoNegociacaoId,
+        VendedorId: f.vendedorId || undefined,
+        Placa: f.placa || undefined,
+        Nome: f.cliente || undefined,
+        Telefone: f.telefone?.replace(/\D/g, "") || undefined,
         Pagina: pagina,
         TamanhoDaPagina: PAGE_SIZE,
         OrdenarPor: "DataInclusao",
@@ -124,12 +143,13 @@ export default function Painel() {
       const response = await painelDoVendedorService.consultar(filtro);
       const lista = response.data.lista ?? [];
 
+      cache.current.set(key, lista);
+
       setHasMore(lista.length === PAGE_SIZE);
       setPage(pagina);
-      setDados((prev) => (append ? [...prev, ...lista] : lista));
-    } catch {
-      Alert.alert("Erro", "Não foi possível carregar o painel");
+      setDados((prev) => (pagina === 1 ? lista : [...prev, ...lista]));
     } finally {
+      requestLock.current = false;
       setLoadingInicial(false);
       setLoadingMais(false);
       setRefreshing(false);
@@ -139,89 +159,56 @@ export default function Painel() {
   useEffect(() => {
     async function carregarEmpresa() {
       const empresaIdStorage = await AsyncStorage.getItem("@empresaId");
-      const tipoPerfil = await AsyncStorage.getItem("@perfil");
+      const perfil = await AsyncStorage.getItem("@perfil");
       const vendedorIdStorage = await AsyncStorage.getItem("@vendedorId");
 
-      setEmpresaId(empresaId);
+      setTipoPerfil(perfil);
 
       if (empresaIdStorage) {
-        setFilters((prev) => ({
-          ...prev,
-          empresaId: Number(empresaIdStorage),
+        const empId = Number(empresaIdStorage);
+
+        const novosFiltros = {
+          statusId: 170,
+          momentoId: undefined,
+          tipoNegociacaoId: undefined,
           vendedorId:
-            tipoPerfil === "Vendedor" && vendedorIdStorage
+            perfil === "Vendedor" && vendedorIdStorage
               ? Number(vendedorIdStorage)
-              : prev.vendedorId,
-        }));
+              : undefined,
+          placa: "",
+          cliente: "",
+          telefone: "",
+          empresaId: empId,
+        };
+
+        setFilters(novosFiltros);
+
+        // 🔥 CHAMA COM OS FILTROS CORRETOS
+        carregarPagina(1, false, novosFiltros);
       }
     }
 
     carregarEmpresa();
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!filters.empresaId) return;
-
-      setRefreshing(false);
-      setLoadingMais(false);
-      setHasMore(true);
-      setPage(1);
-
-      carregarPagina(1, false);
-    }, [filters.empresaId]),
-  );
-
   function aplicarFiltros() {
     setShowFilters(false);
-    setHasMore(true);
+    cache.current.clear();
     setPage(1);
     carregarPagina(1, false);
   }
 
   async function carregarMais() {
-    if (!filters.empresaId || loadingMais || !hasMore) return;
-
-    setLoadingMais(true);
-
-    try {
-      const filtro: PainelDoVendedorFiltro = {
-        EmpresaId: filters.empresaId, // ✅
-        StatusMovimentacaoId: filters.statusId,
-        MomentoId: filters.momentoId,
-        TipoNegociacaoId: filters.tipoNegociacaoId,
-        VendedorId: filters.vendedorId ? filters.vendedorId : undefined,
-        Placa: filters.placa || undefined,
-        Nome: filters.cliente || undefined,
-        Telefone: filters.telefone
-          ? filters.telefone.replace(/\D/g, "")
-          : undefined,
-        Pagina: page + 1,
-        TamanhoDaPagina: PAGE_SIZE,
-        OrdenarPor: "DataInclusao",
-        Ordem: "DESC",
-      };
-
-      const response = await painelDoVendedorService.consultar(filtro);
-      const lista = response.data.lista ?? [];
-
-      setDados((prev) => [...prev, ...lista]);
-      setPage((prev) => prev + 1);
-      setHasMore(lista.length === PAGE_SIZE);
-    } catch {
-      Alert.alert("Erro", "Não foi possível carregar mais registros");
-    } finally {
-      setLoadingMais(false);
-    }
+    if (!hasMore || loadingMais) return;
+    carregarPagina(page + 1, true);
   }
 
   function onRefresh() {
     setRefreshing(true);
-    setHasMore(true);
+    cache.current.clear();
     setPage(1);
-    carregarPaginaInicial();
+    carregarPagina(1, false);
   }
-
   async function carregarPaginaInicial(pagina: number = 1) {
     try {
       const filtro: PainelDoVendedorFiltro = {
@@ -247,18 +234,22 @@ export default function Painel() {
   }
 
   function limpar() {
-    setFilters((prev) => ({
+    const novosFiltros = {
       statusId: 170,
       momentoId: undefined,
       tipoNegociacaoId: undefined,
-      vendedorId: undefined,
+      vendedorId: tipoPerfil === "Vendedor" ? filters.vendedorId : undefined,
       placa: "",
       cliente: "",
       telefone: "",
-      empresaId: prev.empresaId, // ✅ mantém
-    }));
+      empresaId: filters.empresaId,
+    };
 
-    onRefresh();
+    cache.current.clear();
+    setFilters(novosFiltros);
+    setPage(1);
+
+    carregarPagina(1, false, novosFiltros); // 👈 ESSA LINHA RESOLVE
   }
 
   return (
@@ -379,32 +370,11 @@ export default function Painel() {
           data={dados}
           keyExtractor={(i) => String(i.movimentacaoId)}
           contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <CardMovimentacao
-              item={item}
-              onCancel={() => {
-                setCancelarItem(item);
-                setMotivoCancelamento("");
-              }}
-            />
-          )}
+          renderItem={renderItem}
           refreshing={refreshing}
           onRefresh={onRefresh}
-          ListFooterComponent={
-            hasMore ? (
-              <TouchableOpacity
-                style={styles.loadMoreButton}
-                onPress={carregarMais}
-                disabled={loadingMais}
-              >
-                {loadingMais ? (
-                  <ActivityIndicator color="#2563EB" />
-                ) : (
-                  <Text style={styles.loadMoreText}>Carregar mais</Text>
-                )}
-              </TouchableOpacity>
-            ) : null
-          }
+          onEndReached={() => carregarMais()}
+          onEndReachedThreshold={0.3}
         />
       )}
 
@@ -480,7 +450,7 @@ function CardMovimentacao({ item, onCancel }: CardMovimentacaoProps) {
         : "-";
 
   return (
-    <TouchableOpacity
+    <Pressable
       style={styles.card}
       onPress={() => irParaDetalhes(item.movimentacaoId)}
     >
@@ -523,16 +493,26 @@ function CardMovimentacao({ item, onCancel }: CardMovimentacaoProps) {
 
       <View style={styles.cardActions}>
         <TouchableOpacity>
-          <Feather name="edit" size={24} color="#2563EB" />
+          {/* <Feather name="edit" size={24} color="#2563EB" /> */}
         </TouchableOpacity>
 
         {item.statusMovimentacaoId === 170 && (
-          <TouchableOpacity onPress={onCancel}>
+          <Pressable
+            onPress={(e) => {
+              e.stopPropagation(); // 🔥 impede abrir o card
+              onCancel();
+            }}
+            hitSlop={10}
+            style={({ pressed }) => [
+              { padding: 6 },
+              pressed && Platform.OS === "ios" && { opacity: 0.5 }, // feedback no iOS
+            ]}
+          >
             <Feather name="trash-2" size={24} color="#DC2626" />
-          </TouchableOpacity>
+          </Pressable>
         )}
       </View>
-    </TouchableOpacity>
+    </Pressable>
   );
 }
 
@@ -607,7 +587,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 
-  cardTitle: { color: "#fff", fontWeight: "600" },
+  cardTitle: { color: "#fff", fontWeight: "600", textTransform: "uppercase" },
   cardInfoRow: {
     marginTop: 10,
     flexDirection: "row",

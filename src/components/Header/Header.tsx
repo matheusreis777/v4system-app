@@ -10,6 +10,7 @@ import { Feather } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { router } from "expo-router";
 
 interface HeaderProps {
   title: string;
@@ -66,7 +67,11 @@ export default function Header({
         {/* CENTRO */}
         <View style={styles.center}>
           {empresa && (
-            <Text style={styles.subtitle} numberOfLines={1}>
+            <Text
+              style={styles.subtitle}
+              numberOfLines={1}
+              onPress={() => router.replace("/app/intro")}
+            >
               {empresa}
             </Text>
           )}

@@ -96,19 +96,25 @@ export default function Estoque() {
     carregarPagina(1, false);
   }, [filters.empresaId]);
 
-  async function carregarPagina(pagina: number, append = false) {
-    if (!filters.empresaId) return;
+  async function carregarPagina(
+    pagina: number,
+    append = false,
+    filtrosOverride = filters,
+  ) {
+    const f = filtrosOverride;
+
+    if (!f.empresaId) return;
 
     append ? setLoadingMais(true) : setLoadingInicial(true);
 
     try {
       const filtro: EstoqueFiltro = {
-        EmpresaId: filters.empresaId,
-        Placa: filters.placa.replace(/-/g, "") || "",
-        TipoVeiculoId: filters.tipoVeiculoId ?? 0,
-        MarcaId: filters.marcaId ?? 0,
-        ModeloId: filters.modeloId ?? 0,
-        StatusVeiculoId: filters.statusVeiculoId ?? 0,
+        EmpresaId: f.empresaId,
+        Placa: f.placa.replace(/-/g, "") || "",
+        TipoVeiculoId: f.tipoVeiculoId ?? 0,
+        MarcaId: f.marcaId ?? 0,
+        ModeloId: f.modeloId ?? 0,
+        StatusVeiculoId: f.statusVeiculoId ?? 0,
         Pagina: pagina,
         TamanhoDaPagina: PAGE_SIZE,
         OrdenarPor: "Id",
@@ -183,11 +189,11 @@ export default function Estoque() {
     );
   }
 
-  function resetAndLoad() {
+  function resetAndLoad(novosFiltros = filters) {
     setPage(1);
     setHasMore(true);
     setVeiculos([]);
-    carregarPagina(1, false);
+    carregarPagina(1, false, novosFiltros);
   }
 
   function aplicarFiltros() {
@@ -196,16 +202,17 @@ export default function Estoque() {
   }
 
   function limpar() {
-    setFilters({
+    const novosFiltros = {
       placa: "",
       tipoVeiculoId: undefined,
       marcaId: undefined,
       modeloId: undefined,
       statusVeiculoId: undefined,
-      empresaId: empresaId ?? 0,
-    });
+      empresaId: empresaId ?? undefined,
+    };
 
-    resetAndLoad();
+    setFilters(novosFiltros);
+    resetAndLoad(novosFiltros);
   }
 
   function irParaChecklist(
@@ -238,57 +245,42 @@ export default function Estoque() {
   function renderVeiculo({ item }: { item: Veiculo }) {
     return (
       <TouchableOpacity
+        activeOpacity={0.9}
         style={styles.card}
         onPress={() => irParaChecklist(item.id, empresaId ?? 0, item)}
       >
-        <View style={styles.card}>
-          <View style={styles.cardTop}>
-            <Text style={styles.placa}>{maskPlate(item.placa)}</Text>
-            <View style={styles.statusBadge}>
-              <Text style={styles.statusText}>{item.statusVeiculo}</Text>
-            </View>
-          </View>
+        {/* HEADER */}
+        <View style={styles.cardHeader}>
+          <Text style={styles.placa}>{maskPlate(item.placa)}</Text>
 
-          <Text style={styles.title}>
-            {item.tipoVeiculo} • {item.marca} {item.modelo}
-          </Text>
-
-          <View style={styles.infoGrid}>
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Ano</Text>
-              <Text style={styles.infoValue}>
-                {item.anoModelo}/{item.anoFabricacao}
-              </Text>
-            </View>
-
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>KM</Text>
-              <Text style={styles.infoValue}>
-                {item.km.toLocaleString()} km
-              </Text>
-            </View>
-
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Cor</Text>
-              <Text style={styles.infoValue}>{item.cor}</Text>
-            </View>
-
-            <View style={styles.infoItem}>
-              <Text style={styles.infoLabel}>Combustível</Text>
-              <Text style={styles.infoValue}>{item.combustivel}</Text>
-            </View>
-
-            <View style={styles.infoItemValor}>
-              <Text style={styles.infoLabel}>Valor Venda</Text>
-              <Text style={styles.infoValue}>
-                R${" "}
-                {item.valorVenda?.toLocaleString("pt-BR", {
-                  minimumFractionDigits: 2,
-                })}
-              </Text>
-            </View>
+          <View style={styles.statusBadge}>
+            <Text style={styles.statusText}>{item.statusVeiculo}</Text>
           </View>
         </View>
+
+        {/* VEÍCULO */}
+        <Text style={styles.title} numberOfLines={1}>
+          {item.marca} {item.modelo}
+        </Text>
+
+        <Text style={styles.subtitle}>
+          {item.tipoVeiculo} • {item.anoModelo}/{item.anoFabricacao}
+        </Text>
+
+        {/* GRID */}
+        <View style={styles.infoRow}>
+          <Text style={styles.infoMini}>{item.km.toLocaleString()} km</Text>
+          <Text style={styles.infoMini}>{item.cor}</Text>
+          <Text style={styles.infoMini}>{item.combustivel}</Text>
+        </View>
+
+        {/* VALOR */}
+        <Text style={styles.valor}>
+          R${" "}
+          {item.valorVenda?.toLocaleString("pt-BR", {
+            minimumFractionDigits: 2,
+          })}
+        </Text>
       </TouchableOpacity>
     );
   }
@@ -329,16 +321,19 @@ export default function Estoque() {
                 value={filters.tipoVeiculoId}
                 options={tipoVeiculo}
                 onChange={(id) => {
-                  setFilters((p) => ({
-                    ...p,
-                    tipoVeiculoId: id,
-                    marcaId: undefined,
-                    modeloId: undefined,
-                  }));
+                  setFilters((p) => {
+                    const novo = {
+                      ...p,
+                      marcaId: id,
+                      modeloId: undefined,
+                    };
 
-                  reload({
-                    tipoVeiculoId: id,
-                    marcaId: undefined,
+                    reload({
+                      tipoVeiculoId: novo.tipoVeiculoId,
+                      marcaId: id,
+                    });
+
+                    return novo;
                   });
                 }}
               />
@@ -465,7 +460,7 @@ const styles = StyleSheet.create({
 
   container: { padding: 16, flex: 1 },
 
-  searchBox: { borderRadius: 16, elevation: 2 },
+  searchBox: { borderRadius: 16 },
   searchRow: { flexDirection: "row", alignItems: "center" },
   inputWrapper: { flex: 1, marginRight: 8 },
 
@@ -475,16 +470,8 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
+    padding: 10,
     marginBottom: 14,
-  },
-
-  card: {
-    backgroundColor: "#ffffff",
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 14,
-    elevation: 2,
   },
 
   cardTop: {
@@ -492,28 +479,6 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 6,
-  },
-
-  placa: { fontSize: 18, fontWeight: "700", color: "#1844a2" },
-
-  statusBadge: {
-    backgroundColor: "#e6f4ea",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-
-  statusText: {
-    color: "#2e7d32",
-    fontWeight: "600",
-    fontSize: 12,
-  },
-
-  title: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 12,
   },
 
   infoGrid: {
@@ -546,5 +511,70 @@ const styles = StyleSheet.create({
     color: "#888",
     marginTop: 6,
     textAlign: "center",
+  },
+
+  card: {
+    backgroundColor: "#fff",
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 12,
+    elevation: 2,
+  },
+
+  cardHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+
+  placa: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#1844a2",
+  },
+
+  statusBadge: {
+    backgroundColor: "#EDF7ED",
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+
+  statusText: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#2e7d32",
+  },
+
+  title: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#222",
+    marginTop: 4,
+  },
+
+  subtitle: {
+    fontSize: 12,
+    color: "#666",
+    marginBottom: 8,
+  },
+
+  infoRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 6,
+  },
+
+  infoMini: {
+    fontSize: 12,
+    color: "#555",
+    fontWeight: "500",
+  },
+
+  valor: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: "#1844a2",
+    textAlign: "right",
   },
 });

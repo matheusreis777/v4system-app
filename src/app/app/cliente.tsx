@@ -3,7 +3,6 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  Platform,
   ScrollView,
   Animated,
   Alert,
@@ -53,6 +52,9 @@ function filtrosIniciais(empresaId?: number): FiltrosCliente {
 
 const PAGE_SIZE = 10;
 
+export const onlyNumbers = (value?: string) =>
+  value ? value.replace(/\D/g, "") : "";
+
 export default function Cliente() {
   const [empresaId, setEmpresaId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
@@ -75,31 +77,33 @@ export default function Cliente() {
         const id = Number(empresaIdStorage);
         setEmpresaId(id);
         setFilters(filtrosIniciais(id));
+        carregarPagina(1, false, filtrosIniciais(id));
       }
     }
 
     carregarEmpresa();
   }, []);
 
-  useEffect(() => {
-    if (!filters.empresaId) return;
-    resetAndLoad();
-  }, [filters.empresaId]);
+  async function carregarPagina(
+    pagina: number,
+    append = false,
+    filtrosOverride?: FiltrosCliente,
+  ) {
+    const filtroAtual = filtrosOverride ?? filters;
 
-  async function carregarPagina(pagina: number, append = false) {
-    if (!filters.empresaId) return;
+    if (!filtroAtual.empresaId) return;
     if (append && loadingMais) return;
 
     append ? setLoadingMais(true) : setLoadingInicial(true);
 
     try {
       const filtro: ClienteFiltro = {
-        id: filters.id ?? 0,
-        EmpresaId: filters.empresaId,
-        Nome: filters.nome,
-        Email: filters.email,
-        CpfCnpj: filters.cpfCnpj,
-        Telefone: filters.telefone,
+        id: filtroAtual.id ?? 0,
+        EmpresaId: filtroAtual.empresaId,
+        Nome: filtroAtual.nome,
+        Email: filtroAtual.email,
+        CpfCnpj: onlyNumbers(filtroAtual.cpfCnpj),
+        Telefone: onlyNumbers(filtroAtual.telefone),
         Pagina: pagina,
         TamanhoDaPagina: PAGE_SIZE,
         OrdenarPor: "Id",
@@ -138,39 +142,40 @@ export default function Cliente() {
     }
   }
 
-  function resetAndLoad() {
+  function resetAndLoad(novosFiltros?: FiltrosCliente) {
     setPage(1);
     setHasMore(true);
     setClientes([]);
-    carregarPagina(1, false);
+    carregarPagina(1, false, novosFiltros);
   }
 
   function limpar() {
-    setFilters(filtrosIniciais(empresaId ?? undefined));
+    const novosFiltros = filtrosIniciais(empresaId ?? undefined);
+
+    setFilters(novosFiltros);
     setShowFilters(false);
-    resetAndLoad();
+    resetAndLoad(novosFiltros);
   }
 
   function aplicarFiltros() {
-    setFilters((prev) => ({
-      ...prev,
-      nome: prev.nome.trim(),
-      email: prev.email.trim(),
-      cpfCnpj: prev.cpfCnpj.trim(),
-      telefone: prev.telefone.trim(),
-    }));
+    const novosFiltros = {
+      ...filters,
+      nome: filters.nome.trim(),
+      email: filters.email.trim(),
+      cpfCnpj: filters.cpfCnpj.trim(),
+      telefone: filters.telefone.trim(),
+    };
 
+    setFilters(novosFiltros);
     setShowFilters(false);
-    resetAndLoad();
+    resetAndLoad(novosFiltros);
   }
 
   function renderCliente({ item }: { item: Cliente }) {
     return (
       <View style={styles.card}>
-        {/* Nome */}
         <Text style={styles.nome}>{item.nome}</Text>
 
-        {/* CPF + Telefone na mesma linha */}
         <View style={styles.row}>
           <View style={styles.inlineItem}>
             <Feather name="credit-card" size={14} color="#666" />
@@ -187,10 +192,8 @@ export default function Cliente() {
           </View>
         </View>
 
-        {/* Divisor */}
         <View style={styles.divider} />
 
-        {/* Email */}
         <View style={styles.emailRow}>
           <Feather name="mail" size={14} color="#666" />
           <Text style={styles.emailText}>{item.email || "—"}</Text>
@@ -236,13 +239,21 @@ export default function Cliente() {
               />
               <Input
                 label="CPF/CNPJ"
+                keyboardType="numeric"
+                maxLength={18}
                 value={filters.cpfCnpj}
-                onChangeText={(t) => setFilters((p) => ({ ...p, cpfCnpj: t }))}
+                onChangeText={(t) =>
+                  setFilters((p) => ({ ...p, cpfCnpj: maskCPF(t) }))
+                }
               />
               <Input
                 label="Telefone"
                 value={filters.telefone}
-                onChangeText={(t) => setFilters((p) => ({ ...p, telefone: t }))}
+                keyboardType="numeric"
+                maxLength={16}
+                onChangeText={(t) =>
+                  setFilters((p) => ({ ...p, telefone: maskPhone(t) }))
+                }
               />
               <Button title="Aplicar filtros" onPress={aplicarFiltros} />
             </ScrollView>
@@ -320,6 +331,7 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#1844a2",
     marginBottom: 10,
+    textTransform: "uppercase",
   },
 
   row: {

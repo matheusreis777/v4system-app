@@ -67,14 +67,18 @@ export default function Index() {
     }
   };
 
-  // ✅ FUNÇÃO SEGURA PARA PEGAR PUSH TOKEN
+  const handleStayConnectedToggle = async (value: boolean) => {
+    setStayConnected(value);
+
+    if (!value) {
+      await AsyncStorage.removeItem("@savedCpf");
+      await AsyncStorage.removeItem("@savedSenha");
+    }
+  };
+
   async function getPushToken() {
     try {
-      // 🚫 Não roda no Expo Go
-      if (Constants.appOwnership === "expo") {
-        console.log("Push não disponível no Expo Go");
-        return null;
-      }
+      if (Constants.appOwnership === "expo") return null;
 
       if (!Device.isDevice) {
         Alert.alert("Push", "Use um celular físico para notificações");
@@ -83,10 +87,7 @@ export default function Index() {
 
       const { status } = await Notifications.requestPermissionsAsync();
 
-      if (status !== "granted") {
-        console.log("Permissão de notificação negada");
-        return null;
-      }
+      if (status !== "granted") return null;
 
       const token = (await Notifications.getExpoPushTokenAsync()).data;
 
@@ -111,11 +112,18 @@ export default function Index() {
     try {
       const loginData = await signIn(cpf, senha);
 
-      if (!loginData) {
-        throw new Error("Login sem retorno");
+      if (!loginData) throw new Error("Login sem retorno");
+
+      // ✅ RESPEITA O SWITCH
+      if (stayConnected) {
+        await AsyncStorage.setItem("@savedCpf", cpf);
+        await AsyncStorage.setItem("@savedSenha", senha);
+      } else {
+        await AsyncStorage.removeItem("@savedCpf");
+        await AsyncStorage.removeItem("@savedSenha");
       }
 
-      // ✅ SALVA DADOS DO USUÁRIO
+      // ✅ DADOS DO USUÁRIO
       await AsyncStorage.setItem("@telefone", loginData.telefone.toString());
       await AsyncStorage.setItem("@perfil", loginData.usuarioPerfilDescricao);
       await AsyncStorage.setItem("@usuarioId", loginData.usuarioId.toString());
@@ -127,7 +135,7 @@ export default function Index() {
         );
       }
 
-      // ✅ PUSH NÃO PODE QUEBRAR O LOGIN
+      // ✅ PUSH TOKEN
       try {
         const token = await getPushToken();
 
@@ -137,14 +145,11 @@ export default function Index() {
             pushToken: token,
             plataforma: Platform.OS,
           });
-
-          console.log("Push token salvo com sucesso");
         }
       } catch (pushError) {
         console.log("Erro ao registrar push:", pushError);
       }
 
-      // ✅ NAVEGA MESMO SE O PUSH FALHAR
       router.replace("/app/intro");
     } catch (error) {
       console.log("ERRO LOGIN:", error);
@@ -165,12 +170,7 @@ export default function Index() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
         <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 20,
-          }}
+          contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
         >
@@ -200,18 +200,6 @@ export default function Index() {
               isPassword
             />
 
-            <View style={styles.switchRow}>
-              <Switch
-                value={stayConnected}
-                onValueChange={setStayConnected}
-                trackColor={{ false: "#999", true: theme.primary }}
-                thumbColor={theme.buttonBackground}
-              />
-              <Text style={[styles.switchLabel, { marginLeft: 12 }]}>
-                Permanecer conectado
-              </Text>
-            </View>
-
             <Button title="Entrar" onPress={loginScreen} />
 
             <TouchableOpacity onPress={() => router.push("/auth/forgot")}>
@@ -229,14 +217,21 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
+  container: { flex: 1 },
+
+  scroll: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
   },
+
   logo: {
     width: 200,
     height: 40,
     marginBottom: 4,
   },
+
   card: {
     width: "100%",
     maxWidth: 380,
@@ -251,6 +246,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 6 },
     elevation: 9,
   },
+
   subtitle: {
     fontSize: 14,
     color: "#545455",
@@ -258,16 +254,19 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontFamily: Fonts.medium,
   },
+
   forgot: {
     marginTop: 20,
     color: "#2563EB",
     fontSize: 16,
     fontFamily: Fonts.regular,
   },
+
   footer: {
     marginTop: 28,
     fontSize: 12,
   },
+
   switchRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -275,6 +274,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
     marginBottom: 16,
   },
+
   switchLabel: {
     color: "#383636",
     fontSize: 14,

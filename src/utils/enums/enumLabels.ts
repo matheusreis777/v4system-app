@@ -9,7 +9,6 @@ import {
 export function obterLabelMomento(momentoId?: number): string {
   switch (momentoId) {
     case MomentoEnum.Prospectar:
-      return "Prospectar";
     case MomentoEnum.NegociacaoRecepcionar:
       return "Recepcionar";
     case MomentoEnum.NegociacaoQualificar:

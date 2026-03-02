@@ -7,7 +7,7 @@ export default function Index() {
   if (loading) return null;
 
   return isAuthenticated ? (
-    <Redirect href="/app/painel" />
+    <Redirect href="/app/intro" />
   ) : (
     <Redirect href="/auth/login" />
   );
