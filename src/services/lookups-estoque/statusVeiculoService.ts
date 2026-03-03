@@ -12,10 +12,14 @@ class StatusVeiculoService extends GenericService<StatusVeiculoDto[]> {
   async listar(): Promise<LookupItem[]> {
     const response = await this.get(this.baseUrl);
 
-    return response.data.map((item) => ({
-      id: item.id,
-      nome: item.valorTexto,
-    }));
+    const ignorar = ["Retirado", "Transferido", "Consórcio"];
+
+    return response.data
+      .filter((item) => !ignorar.includes(item.valorTexto))
+      .map((item) => ({
+        id: item.id,
+        nome: item.valorTexto,
+      }));
   }
 }
 

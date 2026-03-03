@@ -108,7 +108,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     borderRadius: 30,
-    marginBottom: Platform.OS === "android" ? 46 : 20,
+    marginBottom: Platform.OS === "android" ? 56 : 20,
     marginHorizontal: 10,
     shadowColor: "#000",
     shadowOpacity: 0.6,

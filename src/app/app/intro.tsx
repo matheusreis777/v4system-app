@@ -7,6 +7,7 @@ import {
   FlatList,
   StatusBar,
   TouchableOpacity,
+  Platform,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import Button from "../../components/Button";
@@ -169,6 +170,6 @@ const styles = StyleSheet.create({
 
   footer: {
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: Platform.OS === "android" ? 56 : 20,
   },
 });
