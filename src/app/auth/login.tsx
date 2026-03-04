@@ -112,14 +112,21 @@ export default function Index() {
       // ✅ PUSH TOKEN
       try {
         const token = await registerForPushNotificationsAsync();
+        console.log("🔑 TOKEN OBTIDO NO LOGIN:", token);
         if (token) {
+          console.log("💾 SALVANDO TOKEN NO BACKEND...");
           await pushService.salvar({
             usuarioId: loginData.usuarioId,
             pushToken: token,
             plataforma: Platform.OS,
           });
+          console.log("✅ TOKEN SALVO COM SUCESSO");
+        } else {
+          console.log("❌ TOKEN NULO - NÃO SALVOU");
         }
-      } catch (pushError) {}
+      } catch (pushError) {
+        console.log("❌ ERRO AO SALVAR TOKEN:", pushError);
+      }
 
       router.replace("/app/intro");
     } catch (error) {
