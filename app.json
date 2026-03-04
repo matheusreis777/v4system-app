@@ -23,6 +23,7 @@
           "foregroundImage": "./assets/adaptive-icon.png",
           "backgroundColor": "#ffffff"
         },
+        "googleServicesFile": "./google-services.json",
         "edgeToEdgeEnabled": true,
         "softwareKeyboardLayoutMode": "resize",
         "permissions": ["INTERNET"],
