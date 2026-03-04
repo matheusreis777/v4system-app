@@ -15,20 +15,30 @@
       },
       "ios": {
         "supportsTablet": true,
-        "bundleIdentifier": "com.v4system.crm"
+        "bundleIdentifier": "com.v4system.crm",
+        // add the path to your GoogleService-Info.plist if you use FCM / analytics
+        // this file is generated on the Firebase console and should be placed at
+        // the project root.
+        "googleServicesFile": "./GoogleService-Info.plist"
       },
       "android": {
-  "package": "com.v4system.crm",
-  "adaptiveIcon": {
-    "foregroundImage": "./assets/adaptive-icon.png",
-    "backgroundColor": "#ffffff"
-  },
-  "edgeToEdgeEnabled": true,
-  "softwareKeyboardLayoutMode": "resize",
-  "permissions": ["INTERNET"],
-  "usesCleartextTraffic": true
-},
+        "package": "com.v4system.crm",
+        "adaptiveIcon": {
+          "foregroundImage": "./assets/adaptive-icon.png",
+          "backgroundColor": "#ffffff"
+        },
+        "edgeToEdgeEnabled": true,
+        "softwareKeyboardLayoutMode": "resize",
+        "permissions": ["INTERNET"],
+        "usesCleartextTraffic": true,
+        // path to your Firebase config file for Android. Create this in the project root and
+        // update the string below (see expo docs for details).
+        "googleServicesFile": "./google-services.json"
+      },
       "plugins": [
+        // the notifications plugin wires native configuration automatically when you
+        // prebuild / build the app. keep it near the top of the array.
+        "expo-notifications",
         "expo-secure-store",
         "expo-font",
         "expo-router"

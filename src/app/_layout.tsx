@@ -6,64 +6,62 @@ import Toast from "react-native-toast-message";
 import toastConfig from "../components/alerts/toastConfig";
 import { LookupProvider } from "../contexts/LookupContext";
 import { LookupProviderEstoque } from "../contexts/LookupEstoqueContext";
-import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
 import { useEffect } from "react";
 import { Platform } from "react-native";
 import Constants from "expo-constants";
+import { registerForPushNotificationsAsync } from "../config/pushNotification";
 
-// ✅ HANDLER (fora do componente)
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
-});
+// note: we intentionally avoid importing `expo-notifications` at the
+// module level because doing so on Android when running Expo Go causes a
+// runtime crash (the feature was removed as of SDK53). we dynamically load
+// it below once we've determined we're on a supported build.
 
 export default function RootLayout() {
   useEffect(() => {
-    configurarPush();
+    // Android Expo Go no longer supports push; bail early to avoid the
+    // import crash and inform developer.
+    if (Constants.appOwnership === "expo" && Platform.OS === "android") {
+      return;
+    }
+
+    let receivedSub: any;
+    let responseSub: any;
+
+    async function setup() {
+      const Notifications = await import("expo-notifications");
+
+      Notifications.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: true,
+          shouldSetBadge: true,
+          shouldShowBanner: true,
+          shouldShowList: true,
+        }),
+      });
+
+      // configure pushes and token
+      const token = await registerForPushNotificationsAsync();
+
+      // listeners for debugging
+      receivedSub = Notifications.addNotificationReceivedListener(
+        (notification) => {},
+      );
+      responseSub = Notifications.addNotificationResponseReceivedListener(
+        (response) => {},
+      );
+    }
+
+    setup();
+
+    return () => {
+      receivedSub?.remove();
+      responseSub?.remove();
+    };
   }, []);
 
   async function configurarPush() {
-    try {
-      if (!Device.isDevice) {
-        console.log("Use um dispositivo físico");
-        return;
-      }
-
-      // ✅ ANDROID → CRIA CHANNEL (OBRIGATÓRIO)
-      if (Platform.OS === "android") {
-        await Notifications.setNotificationChannelAsync("default", {
-          name: "default",
-          importance: Notifications.AndroidImportance.MAX,
-          vibrationPattern: [0, 250, 250, 250],
-          lightColor: "#FF231F7C",
-        });
-      }
-
-      // ✅ PERMISSÃO
-      const { status } = await Notifications.requestPermissionsAsync();
-
-      if (status !== "granted") {
-        console.log("Permissão de notificação negada");
-        return;
-      }
-
-      // ✅ TOKEN CORRETO PARA APK / EAS
-      const token = (
-        await Notifications.getExpoPushTokenAsync({
-          projectId: Constants.easConfig?.projectId,
-        })
-      ).data;
-
-      console.log("✅ PUSH TOKEN:", token);
-    } catch (error) {
-      console.log("❌ Erro ao configurar push:", error);
-    }
+    const token = await registerForPushNotificationsAsync();
   }
 
   return (

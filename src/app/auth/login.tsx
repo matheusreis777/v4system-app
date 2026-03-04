@@ -23,9 +23,7 @@ import { useLoading } from "../../contexts/LoadingContext";
 import { router } from "expo-router";
 import { pushService } from "../../services/pushService";
 
-import * as Notifications from "expo-notifications";
-import * as Device from "expo-device";
-import Constants from "expo-constants";
+import { registerForPushNotificationsAsync } from "../../config/pushNotification";
 
 export default function Index() {
   const { theme } = useTheme();
@@ -76,30 +74,6 @@ export default function Index() {
     }
   };
 
-  async function getPushToken() {
-    try {
-      if (Constants.appOwnership === "expo") return null;
-
-      if (!Device.isDevice) {
-        Alert.alert("Push", "Use um celular físico para notificações");
-        return null;
-      }
-
-      const { status } = await Notifications.requestPermissionsAsync();
-
-      if (status !== "granted") return null;
-
-      const token = (await Notifications.getExpoPushTokenAsync()).data;
-
-      console.log("PUSH TOKEN:", token);
-
-      return token;
-    } catch (error) {
-      console.log("Erro ao obter push token:", error);
-      return null;
-    }
-  }
-
   const loginScreen = async () => {
     if (!cpf || !senha) {
       Alert.alert("Atenção", "Preencha CPF e senha.");
@@ -137,8 +111,7 @@ export default function Index() {
 
       // ✅ PUSH TOKEN
       try {
-        const token = await getPushToken();
-
+        const token = await registerForPushNotificationsAsync();
         if (token) {
           await pushService.salvar({
             usuarioId: loginData.usuarioId,
@@ -146,13 +119,10 @@ export default function Index() {
             plataforma: Platform.OS,
           });
         }
-      } catch (pushError) {
-        console.log("Erro ao registrar push:", pushError);
-      }
+      } catch (pushError) {}
 
       router.replace("/app/intro");
     } catch (error) {
-      console.log("ERRO LOGIN:", error);
       Alert.alert("Falha no login", "Verifique suas credenciais.");
     } finally {
       hideLoading();
