@@ -21,7 +21,6 @@ export async function registerForPushNotificationsAsync(): Promise<
 > {
   try {
     if (!Device.isDevice) {
-      console.log("Push notifications require a physical device");
       return null;
     }
 
@@ -38,7 +37,6 @@ export async function registerForPushNotificationsAsync(): Promise<
     }
 
     if (finalStatus !== "granted") {
-      console.log("Permissão de notificação negada");
       return null;
     }
 
@@ -60,7 +58,6 @@ export async function registerForPushNotificationsAsync(): Promise<
     const tokenResp = await Notifications.getExpoPushTokenAsync({ projectId });
     return tokenResp.data;
   } catch (error) {
-    console.log("Erro ao registrar notifications:", error);
     return null;
   }
 }
