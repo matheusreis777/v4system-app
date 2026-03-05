@@ -7,12 +7,14 @@ import toastConfig from "../components/alerts/toastConfig";
 import { LookupProvider } from "../contexts/LookupContext";
 import { LookupProviderEstoque } from "../contexts/LookupEstoqueContext";
 import { useEffect } from "react";
+import { useRouter } from "expo-router";
 import { registerForPushNotificationsAsync } from "../config/pushNotification";
 
 export default function RootLayout() {
   useEffect(() => {
     let receivedSub: any;
     let responseSub: any;
+    const router = useRouter();
 
     async function setup() {
       try {
@@ -38,11 +40,25 @@ export default function RootLayout() {
             //console.log("📬 notificação recebida:", notification);
           },
         );
-        responseSub = Notifications.addNotificationResponseReceivedListener(
-          (response) => {
-            //console.log("🎯 resposta da notificação:", response);
-          },
-        );
+        // helper so we can reuse for both the listener and initial response
+        function handleResponse(response: any) {
+          //console.log("🎯 resposta da notificação:", response);
+          const data: any = response.notification.request.content.data;
+          const route = data?.screen || data?.route || data?.url;
+          if (route) {
+            router.push(route);
+          }
+        }
+
+        responseSub =
+          Notifications.addNotificationResponseReceivedListener(handleResponse);
+
+        // if the app was opened by tapping the notification (cold start) we also
+        // need to handle that case
+        const last = await Notifications.getLastNotificationResponseAsync();
+        if (last) {
+          handleResponse(last);
+        }
       } catch (error) {
         //console.log("Push setup error (expected in Expo Go Android):", error);
       }
