@@ -11,10 +11,11 @@ import { useRouter } from "expo-router";
 import { registerForPushNotificationsAsync } from "../config/pushNotification";
 
 export default function RootLayout() {
+  const router = useRouter();
+
   useEffect(() => {
     let receivedSub: any;
     let responseSub: any;
-    const router = useRouter();
 
     async function setup() {
       try {
@@ -70,7 +71,7 @@ export default function RootLayout() {
       receivedSub?.remove();
       responseSub?.remove();
     };
-  }, []);
+  }, [router]);
 
   return (
     <ThemeProvider>

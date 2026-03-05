@@ -324,13 +324,14 @@ export default function Estoque() {
                   setFilters((p) => {
                     const novo = {
                       ...p,
-                      marcaId: id,
+                      tipoVeiculoId: id,
+                      marcaId: undefined,
                       modeloId: undefined,
                     };
 
                     reload({
-                      tipoVeiculoId: novo.tipoVeiculoId,
-                      marcaId: id,
+                      tipoVeiculoId: id,
+                      marcaId: undefined,
                     });
 
                     return novo;
