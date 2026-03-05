@@ -30,21 +30,21 @@ export default function RootLayout() {
 
         // configure pushes and token
         const token = await registerForPushNotificationsAsync();
-        console.log("✅ PUSH TOKEN (layout):", token);
+        //console.log("✅ PUSH TOKEN (layout):", token);
 
         // listeners for debugging
         receivedSub = Notifications.addNotificationReceivedListener(
           (notification) => {
-            console.log("📬 notificação recebida:", notification);
+            //console.log("📬 notificação recebida:", notification);
           },
         );
         responseSub = Notifications.addNotificationResponseReceivedListener(
           (response) => {
-            console.log("🎯 resposta da notificação:", response);
+            //console.log("🎯 resposta da notificação:", response);
           },
         );
       } catch (error) {
-        console.log("Push setup error (expected in Expo Go Android):", error);
+        //console.log("Push setup error (expected in Expo Go Android):", error);
       }
     }
 
