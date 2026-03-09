@@ -25,7 +25,7 @@
         },
         "googleServicesFile": "./google-services.json",
         "edgeToEdgeEnabled": true,
-        "softwareKeyboardLayoutMode": "resize",
+        "softwareKeyboardLayoutMode": "pan",
         "permissions": ["INTERNET"],
         "usesCleartextTraffic": true
       },

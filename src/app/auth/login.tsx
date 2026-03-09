@@ -144,11 +144,14 @@ export default function Index() {
     >
       <KeyboardAvoidingView
         style={{ flex: 1, width: "100%" }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode={
+            Platform.OS === "ios" ? "interactive" : "on-drag"
+          }
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.card}>

@@ -168,7 +168,7 @@ export default function Forgot() {
     >
       <KeyboardAvoidingView
         style={{ flex: 1, width: "100%" }}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 20 : 0}
       >
         <ScrollView
@@ -179,6 +179,9 @@ export default function Forgot() {
             padding: 20,
           }}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode={
+            Platform.OS === "ios" ? "interactive" : "on-drag"
+          }
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.card}>
