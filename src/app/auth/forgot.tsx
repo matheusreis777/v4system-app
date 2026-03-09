@@ -11,7 +11,7 @@ import {
   Alert,
   Keyboard,
 } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Fonts } from "../../styles/fonts";
 import { router } from "expo-router";
 import Input from "../../components/Input";
@@ -53,8 +53,24 @@ export default function Forgot() {
   const [telefoneValidado, setTelefoneValidado] = useState(false);
   const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const [confirmError, setConfirmError] = useState("");
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const { validatePhone, trocaSenha } = useAuth();
   const { showLoading, hideLoading } = useLoading();
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener("keyboardDidShow", () => {
+      setIsKeyboardVisible(true);
+    });
+
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+      setIsKeyboardVisible(false);
+    });
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   const checklist = passwordChecklist(newSenha);
 
@@ -172,12 +188,10 @@ export default function Forgot() {
         keyboardVerticalOffset={Platform.OS === "ios" ? 20 : 0}
       >
         <ScrollView
-          contentContainerStyle={{
-            flexGrow: 1,
-            justifyContent: "center",
-            alignItems: "center",
-            padding: 20,
-          }}
+          contentContainerStyle={[
+            styles.scroll,
+            isKeyboardVisible && styles.scrollKeyboardOpen,
+          ]}
           keyboardShouldPersistTaps="handled"
           keyboardDismissMode={
             Platform.OS === "ios" ? "interactive" : "on-drag"
@@ -322,6 +336,19 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+
+  scroll: {
+    flexGrow: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+
+  scrollKeyboardOpen: {
+    justifyContent: "flex-start",
+    paddingTop: 24,
+    paddingBottom: 24,
   },
 
   logo: {
