@@ -32,7 +32,7 @@ export default function Intro() {
     await AsyncStorage.setItem("@empresaId", String(empresa.id));
     await AsyncStorage.setItem("@nameempresa", empresa.nome);
 
-    router.replace("/app/painel");
+    router.replace("/app/dashboard");
   }
 
   useEffect(() => {

@@ -45,9 +45,31 @@ export default function Checklist() {
     dadosVeiculos?: string;
   }>();
 
-  const veiculo: Veiculo | null = dadosVeiculos
-    ? JSON.parse(dadosVeiculos)
-    : null;
+  const rawVeiculo = dadosVeiculos ? JSON.parse(dadosVeiculos) : null;
+
+  // Normalização para o componente (Suporte a camelCase e PascalCase)
+  const m = rawVeiculo?.modelo || rawVeiculo?.Modelo;
+  const brand = rawVeiculo?.marca || rawVeiculo?.Marca || m?.marca?.nome || m?.Marca?.Nome || "";
+  const model = rawVeiculo?.modeloNome || rawVeiculo?.ModeloNome || m?.nome || m?.Nome || rawVeiculo?.modelo || rawVeiculo?.Modelo || "";
+
+  const veiculo = rawVeiculo ? {
+    id: rawVeiculo.id || rawVeiculo.Id,
+    placa: rawVeiculo.placa || rawVeiculo.Placa || "",
+    statusVeiculo: rawVeiculo.statusVeiculoNome || rawVeiculo.StatusVeiculoNome || rawVeiculo.statusVeiculo || "—",
+    tipoVeiculo: rawVeiculo.tipoVeiculoDescricao || rawVeiculo.TipoVeiculoDescricao || rawVeiculo.tipoVeiculo || "—",
+    marcaModelo: rawVeiculo.marcaModelo || rawVeiculo.MarcaModelo || `${brand} ${model}`.trim() || "—",
+    anoModelo: rawVeiculo.anoModelo || rawVeiculo.AnoModelo || 0,
+    anoFabricacao: rawVeiculo.anoFabricacao || rawVeiculo.AnoFabricacao || 0,
+    km: rawVeiculo.quilometragem || rawVeiculo.Quilometragem || rawVeiculo.km || 0,
+    cor: rawVeiculo.corNome || rawVeiculo.CorNome || rawVeiculo.cor || "—",
+    combustivel: rawVeiculo.combustivelNome || rawVeiculo.CombustivelNome || rawVeiculo.combustivel || "—",
+    valorVenda: rawVeiculo.valorVenda || rawVeiculo.ValorVenda || rawVeiculo.resumoGeral?.valorVenda || rawVeiculo.ResumoGeral?.ValorVenda || 0
+  } : null;
+
+  const formatCurrency = (val: number) => {
+    if (!val) return "R$ 0,00";
+    return "R$ " + val.toFixed(2).replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  };
 
   const [questionarios, setQuestionarios] = useState<QuestionarioPorEmpresa[]>(
     [],
@@ -104,12 +126,14 @@ export default function Checklist() {
             <View style={styles.cardTop}>
               <Text style={[styles.placa, { fontFamily: Fonts.condensedBold, color: theme.primary }]}>{maskPlate(veiculo.placa)}</Text>
               <View style={[styles.statusBadge, { backgroundColor: theme.mode === "light" ? "#EDF0F4" : "#1A4480" }]}>
-                <Text style={[styles.statusText, { color: theme.text, fontFamily: Fonts.medium }]}>{veiculo.statusVeiculo.toUpperCase()}</Text>
+                <Text style={[styles.statusText, { color: theme.text, fontFamily: Fonts.medium }]}>
+                   {(veiculo.statusVeiculo || "").toUpperCase()}
+                </Text>
               </View>
             </View>
 
             <Text style={[styles.title, { fontFamily: Fonts.bold, color: theme.text }]}>
-              {veiculo.tipoVeiculo} • {veiculo.marca} {veiculo.modelo}
+               {veiculo.marcaModelo}
             </Text>
 
             <View style={styles.infoGrid}>
@@ -123,7 +147,7 @@ export default function Checklist() {
               <View style={styles.infoItem}>
                 <Text style={[styles.infoLabel, { fontFamily: Fonts.bold, color: theme.primary }]}>KM</Text>
                 <Text style={[styles.infoValue, { fontFamily: Fonts.medium, color: theme.text }]}>
-                  {veiculo.km.toLocaleString()} km
+                  {veiculo.km?.toLocaleString() || "0"} km
                 </Text>
               </View>
 
@@ -140,10 +164,7 @@ export default function Checklist() {
               <View style={styles.infoItemValor}>
                 <Text style={[styles.infoLabel, { fontFamily: Fonts.bold, color: theme.primary }]}>VALOR VENDA</Text>
                 <Text style={[styles.infoValue, { color: theme.accent, fontFamily: Fonts.condensedBold, fontSize: 18 }]}>
-                  R${" "}
-                  {veiculo.valorVenda?.toLocaleString("pt-BR", {
-                    minimumFractionDigits: 2,
-                  })}
+                  {formatCurrency(veiculo.valorVenda)}
                 </Text>
               </View>
             </View>

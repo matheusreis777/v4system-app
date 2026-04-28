@@ -261,9 +261,9 @@ export default function Painel() {
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <RNStatusBar barStyle="light-content" />
       <Header
-        title="Painel de Movimentações"
+        title="Gestão de Vendas"
         leftIcon="chevron-left"
-        onLeftPress={() => router.replace("/app/intro")}
+        onLeftPress={() => router.replace("/app/dashboard")}
         rightIcons={[
           {
             icon: "plus",

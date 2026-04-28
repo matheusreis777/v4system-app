@@ -7,10 +7,10 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState, useCallback } from "react";
 
 const tabs = [
-  { label: "Painel", route: "/app/painel", icon: "painel" },
+  { label: "Início", route: "/app/dashboard", icon: "dashboard" },
+  { label: "Vendas", route: "/app/painel", icon: "vendas" },
   { label: "Estoque", route: "/app/estoque", icon: "estoque" },
   { label: "Clientes", route: "/app/cliente", icon: "clientes" },
-  { label: "Notificações", route: "/app/notificacao", icon: "notificacoes" },
   { label: "Perfil", route: "/app/perfil", icon: "perfil" },
 ];
 
@@ -66,8 +66,10 @@ export default function BottomTab() {
     }
 
     switch (name) {
-      case "painel":
-        return <Feather name="home" size={size} color={color} />;
+      case "dashboard":
+        return <Feather name="grid" size={size} color={color} />;
+      case "vendas":
+        return <Feather name="trending-up" size={size} color={color} />;
       case "estoque":
         return <FontAwesome name="car" size={size} color={color} />;
       case "clientes":

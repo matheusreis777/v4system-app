@@ -30,7 +30,11 @@ export class GenericService<TResponse = any> {
 
     config.params = params; // 👈 ESSENCIAL
 
-    return api.get<TResponse>(finalUrl, config);
+    // ✅ DETECTA URL ABSOLUTA
+    const isAbsoluteUrl = /^https?:\/\//i.test(finalUrl);
+    const axiosInstance: AxiosInstance = isAbsoluteUrl ? axios : api;
+
+    return axiosInstance.get<TResponse>(finalUrl, config);
   }
 
   async postFiltro(

@@ -52,6 +52,7 @@ export function maskCEP(value: string) {
 
 /* PLACA */
 export function maskPlate(value: string) {
+  if (!value) return "";
   const cleaned = value
     .toUpperCase()
     .replace(/[^A-Z0-9]/g, "")
