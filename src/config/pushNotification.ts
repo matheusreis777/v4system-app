@@ -24,21 +24,17 @@ export async function registerForPushNotificationsAsync(): Promise<
       return null;
     }
 
-    console.log("📱 INICIANDO REGISTRO DE PUSH...");
 
     // Dynamically import to avoid crashes in Expo Go Android at module load time
     const Notifications = await import("expo-notifications");
-    console.log("✅ expo-notifications CARREGADO");
 
     const { status: existingStatus } =
       await Notifications.getPermissionsAsync();
-    console.log("🔐 STATUS PERMISSÃO EXISTENTE:", existingStatus);
     let finalStatus = existingStatus;
 
     if (existingStatus !== "granted") {
       const { status } = await Notifications.requestPermissionsAsync();
       finalStatus = status;
-      console.log("🔐 STATUS PERMISSÃO APÓS REQUEST:", finalStatus);
     }
 
     if (finalStatus !== "granted") {
@@ -52,7 +48,6 @@ export async function registerForPushNotificationsAsync(): Promise<
         vibrationPattern: [0, 250, 250, 250],
         lightColor: "#FF231F7C",
       });
-      console.log("📱 CANAL ANDROID CRIADO");
     }
 
     const projectId =
@@ -61,13 +56,12 @@ export async function registerForPushNotificationsAsync(): Promise<
       // fallback for older SDKs
       (Constants.manifest as any)?.extra?.eas?.projectId;
 
-    console.log("🆔 PROJECT ID:", projectId);
 
     const tokenResp = await Notifications.getExpoPushTokenAsync({ projectId });
-    console.log("🎫 TOKEN RESPONSE:", tokenResp);
+    
     return tokenResp.data;
   } catch (error) {
-    console.log("❌ ERRO NO REGISTER PUSH:", error);
+    
     return null;
   }
 }

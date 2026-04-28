@@ -204,7 +204,7 @@ export default function Forgot() {
             />
 
             {/* Título */}
-            <Text style={[styles.subtitle, { color: theme.primary, fontFamily: Fonts.condensedBold }]}>SISTEMA DE GESTÃO CRM</Text>
+            <Text style={[styles.subtitle, { color: theme.primary, fontFamily: Fonts.condensedBold }]}>SISTEMA DE GESTÃO PARA LOJAS DE VEÍCULOS</Text>
 
             <Text style={styles.subtitle}>Recuperar Senha</Text>
 

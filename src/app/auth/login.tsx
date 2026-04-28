@@ -112,20 +112,20 @@ export default function Index() {
       // ✅ PUSH TOKEN
       try {
         const token = await registerForPushNotificationsAsync();
-        console.log("🔑 TOKEN OBTIDO NO LOGIN:", token);
+        
         if (token) {
-          console.log("💾 SALVANDO TOKEN NO BACKEND...");
+          
           await pushService.salvar({
             usuarioId: loginData.usuarioId,
             pushToken: token,
             plataforma: Platform.OS,
           });
-          console.log("✅ TOKEN SALVO COM SUCESSO");
+          
         } else {
-          console.log("❌ TOKEN NULO - NÃO SALVOU");
+         
         }
       } catch (pushError) {
-        console.log("❌ ERRO AO SALVAR TOKEN:", pushError);
+       
       }
 
       router.replace("/app/intro");
@@ -156,7 +156,7 @@ export default function Index() {
               resizeMode="contain"
             />
 
-            <Text style={[styles.subtitle, { color: theme.primary, fontFamily: Fonts.condensedBold }]}>SISTEMA DE GESTÃO CRM</Text>
+            <Text style={[styles.subtitle, { color: theme.primary, fontFamily: Fonts.condensedBold }]}>SISTEMA DE GESTÃO PARA LOJAS DE VEÍCULOS</Text>
 
             <Input
               label="CPF"
