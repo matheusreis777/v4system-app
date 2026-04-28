@@ -46,7 +46,7 @@ export default function BottomTab() {
   );
 
   function renderIcon(name: string, active: boolean) {
-    const color = active ? "#FFFFFF" : "rgba(255,255,255,0.55)";
+    const color = active ? "#FF8000" : "rgba(255,255,255,0.55)";
     const size = 22;
 
     if (name === "notificacoes") {
@@ -101,13 +101,13 @@ export default function BottomTab() {
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
-    height: 58,
-    backgroundColor: "#1844a2",
+    height: 62,
+    backgroundColor: "#061D3D",
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    borderRadius: 30,
+    borderRadius: 20,
     marginBottom: Platform.OS === "android" ? 56 : 20,
     marginHorizontal: 10,
     shadowColor: "#000",
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: -6,
     right: -10,
-    backgroundColor: "#ff3b30",
+    backgroundColor: "#FF8000",
     borderRadius: 10,
     minWidth: 18,
     height: 18,

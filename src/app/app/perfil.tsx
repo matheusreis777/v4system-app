@@ -5,6 +5,8 @@ import BottomTab from "../../components/BottomTab/BottomTab";
 import Header from "../../components/Header/Header";
 import { router } from "expo-router";
 import { maskCPF, maskPhone } from "../../utils/masks";
+import { Fonts } from "../../styles/fonts";
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface Usuario {
   nome: string;
@@ -15,6 +17,7 @@ interface Usuario {
 export default function Perfil() {
   const [usuario, setUsuario] = useState<Usuario | null>(null);
   const [nomeUsuario, setNomeUsuario] = useState("");
+  const { theme } = useTheme();
 
   useEffect(() => {
     carregarUsuario();
@@ -75,12 +78,12 @@ export default function Perfil() {
         ]}
       />
 
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <View style={styles.content}>
           <View style={styles.profileCard}>
             {/* NOME */}
             <View style={styles.field}>
-              <Text style={styles.fieldLabel}>Nome</Text>
+              <Text style={[styles.fieldLabel, { fontFamily: Fonts.bold, color: theme.primary }]}>NOME</Text>
               <Text style={[styles.fieldValue, { textAlign: "right" }]}>
                 {nomeUsuario || "-"}
               </Text>
@@ -90,7 +93,7 @@ export default function Perfil() {
 
             {/* CPF */}
             <View style={styles.field}>
-              <Text style={styles.fieldLabel}>Login (CPF)</Text>
+              <Text style={[styles.fieldLabel, { fontFamily: Fonts.bold, color: theme.primary }]}>LOGIN (CPF)</Text>
               <Text style={[styles.fieldValue, { textAlign: "right" }]}>
                 {usuario?.cpf ? maskCPF(usuario.cpf) : "-"}
               </Text>
@@ -100,7 +103,7 @@ export default function Perfil() {
 
             {/* TELEFONE */}
             <View style={styles.field}>
-              <Text style={styles.fieldLabel}>Telefone</Text>
+              <Text style={[styles.fieldLabel, { fontFamily: Fonts.bold, color: theme.primary }]}>TELEFONE</Text>
               <Text style={[styles.fieldValue, { textAlign: "right" }]}>
                 {usuario?.telefone ? maskPhone(usuario.telefone) : "-"}
               </Text>
@@ -141,15 +144,16 @@ const styles = StyleSheet.create({
   },
 
   fieldLabel: {
-    fontSize: 13,
-    color: "#888",
+    fontSize: 11,
     marginBottom: 4,
+    letterSpacing: 2,
+    textTransform: "uppercase",
   },
 
   fieldValue: {
     fontSize: 16,
-    fontWeight: "600",
     color: "#111",
+    fontFamily: Fonts.medium,
   },
 
   divider: {

@@ -22,6 +22,7 @@ interface InputProps extends TextInputProps {
   containerStyle?: ViewStyle;
   inputStyle?: TextStyle;
   labelStyle?: TextStyle;
+  leftIcon?: keyof typeof Feather.glyphMap;
 }
 
 export default function Input({
@@ -33,6 +34,7 @@ export default function Input({
   containerStyle,
   inputStyle,
   labelStyle,
+  leftIcon,
   ...rest
 }: InputProps) {
   const { theme } = useTheme();
@@ -105,13 +107,15 @@ export default function Input({
   const styles = StyleSheet.create({
     container: {
       width: "100%",
-      marginBottom: 14,
+      marginBottom: 16,
     },
     label: {
-      marginBottom: 6,
-      fontSize: 14,
+      marginBottom: 8,
+      fontSize: 11,
       color: theme.text,
-      fontFamily: "Poppins",
+      fontFamily: "Barlow-Bold",
+      textTransform: "uppercase",
+      letterSpacing: 3,
     },
     inputWrapper: {
       position: "relative",
@@ -121,17 +125,25 @@ export default function Input({
       width: "100%",
       height: 52,
       borderRadius: 12,
-      paddingHorizontal: 16,
+      paddingHorizontal: leftIcon ? 44 : 16,
       paddingRight: isPassword ? 48 : 16,
-      fontSize: 16,
+      fontSize: 15,
       color: theme.text,
-      backgroundColor: "#F1F5F9",
+      backgroundColor: theme.mode === "light" ? "#EDF0F4" : "#1A4480",
+      fontFamily: "Barlow-Regular",
+      borderWidth: 1,
+      borderColor: theme.borderColor,
     },
     eyeIcon: {
       position: "absolute",
       right: 16,
       height: "100%",
       justifyContent: "center",
+    },
+    leftIcon: {
+      position: "absolute",
+      left: 14,
+      zIndex: 1,
     },
   });
 
@@ -146,6 +158,11 @@ export default function Input({
       {label && <Text style={[styles.label, labelStyle]}>{label}</Text>}
 
       <View style={styles.inputWrapper}>
+        {leftIcon && (
+          <View style={styles.leftIcon}>
+            <Feather name={leftIcon} size={20} color={placeholderTextColor} />
+          </View>
+        )}
         <TextInput
           {...rest}
           value={value}

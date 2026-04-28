@@ -138,7 +138,7 @@ export default function Index() {
 
   return (
       <KeyboardAvoidingView
-        style={{ flex: 1, width: "100%" }}
+        style={{ flex: 1, width: "100%", backgroundColor: theme.background }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView
@@ -156,7 +156,7 @@ export default function Index() {
               resizeMode="contain"
             />
 
-            <Text style={styles.subtitle}>Sistema de Gestão CRM</Text>
+            <Text style={[styles.subtitle, { color: theme.primary, fontFamily: Fonts.condensedBold }]}>SISTEMA DE GESTÃO CRM</Text>
 
             <Input
               label="CPF"
@@ -183,7 +183,7 @@ export default function Index() {
           </View>
 
           <Text style={[styles.footer, { color: theme.text }]}>
-            © 2026 V4 System
+            © 2026 ConnectCar System
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -222,18 +222,18 @@ const styles = StyleSheet.create({
   },
 
   subtitle: {
-    fontSize: 14,
-    color: "#545455",
-    marginBottom: 10,
+    fontSize: 16,
+    marginBottom: 20,
     textAlign: "center",
-    fontFamily: Fonts.medium,
+    letterSpacing: 2,
+    textTransform: "uppercase",
   },
 
   forgot: {
     marginTop: 20,
-    color: "#2563EB",
-    fontSize: 16,
-    fontFamily: Fonts.regular,
+    color: "#FF8000",
+    fontSize: 15,
+    fontFamily: Fonts.medium,
   },
 
   footer: {
@@ -252,6 +252,6 @@ const styles = StyleSheet.create({
   switchLabel: {
     color: "#383636",
     fontSize: 14,
-    fontFamily: "Poppins",
+    fontFamily: Fonts.regular,
   },
 });

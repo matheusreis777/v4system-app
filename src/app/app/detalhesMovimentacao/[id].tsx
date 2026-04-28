@@ -8,6 +8,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Button from "../../../components/Button";
 import { aprovacoesMovimentacaoService } from "../../../services/aprovacaoService";
 import ToastService from "../../../components/alerts/ToastService";
+import { Fonts } from "../../../styles/fonts";
+import { useTheme } from "../../../contexts/ThemeContext";
 
 export default function DetalhesMovimentacao() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -15,6 +17,7 @@ export default function DetalhesMovimentacao() {
   const [detalhes, setDetalhes] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   var [perfil, setPerfil] = useState<string>("");
+  const { theme } = useTheme();
 
   async function carregarDetalhes(idNumber: number) {
     try {
@@ -51,8 +54,8 @@ export default function DetalhesMovimentacao() {
   function renderCampo(label: string, value?: string | number | Date) {
     return (
       <View style={styles.field}>
-        <Text style={styles.label}>{label}</Text>
-        <Text style={styles.value}>{value ? String(value) : "-"}</Text>
+        <Text style={[styles.label, { fontFamily: Fonts.bold, color: theme.primary }]}>{label.toUpperCase()}</Text>
+        <Text style={[styles.value, { fontFamily: Fonts.medium, color: theme.text }]}>{value ? String(value) : "-"}</Text>
       </View>
     );
   }
@@ -131,7 +134,7 @@ export default function DetalhesMovimentacao() {
 
   // ---------- UI ----------
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <Header
         title="Detalhes da Movimentação"
         leftIcon="chevron-left"
@@ -164,7 +167,7 @@ export default function DetalhesMovimentacao() {
 
         {/* RECEPCIONAR */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Recepcionar</Text>
+          <Text style={[styles.sectionTitle, { fontFamily: Fonts.condensedBold, color: theme.accent }]}>Recepcionar</Text>
 
           <View style={styles.rowBetween}>
             {renderCampo("Nome do Lead", detalhes?.nome)}
@@ -187,7 +190,7 @@ export default function DetalhesMovimentacao() {
 
         {/* QUALIFICAR */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Qualificar</Text>
+          <Text style={[styles.sectionTitle, { fontFamily: Fonts.condensedBold, color: theme.accent }]}>Qualificar</Text>
 
           <Text style={styles.subTitle}>Veículos</Text>
           {(detalhes?.veiculos?.length ?? 0) > 0
@@ -201,7 +204,7 @@ export default function DetalhesMovimentacao() {
         </View>
 
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Fechamento</Text>
+          <Text style={[styles.sectionTitle, { fontFamily: Fonts.condensedBold, color: theme.accent }]}>Fechamento</Text>
 
           <Text style={styles.subTitle}>Formas de Pagamentos</Text>
           {(detalhes?.formasPagamento?.length ?? 0) > 0
@@ -248,7 +251,7 @@ export default function DetalhesMovimentacao() {
 
         {/* HISTÓRICO */}
         <View style={styles.card}>
-          <Text style={styles.sectionTitle}>Histórico da Movimentação</Text>
+          <Text style={[styles.sectionTitle, { fontFamily: Fonts.condensedBold, color: theme.accent }]}>Histórico da Movimentação</Text>
 
           {(detalhes?.historicoMovimentacao?.length ?? 0) > 0 ? (
             detalhes.historicoMovimentacao.map(
@@ -268,7 +271,6 @@ export default function DetalhesMovimentacao() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#f2f4f7",
   },
 
   scrollContent: {
@@ -298,10 +300,11 @@ const styles = StyleSheet.create({
 
   subTitle: {
     fontSize: 14,
-    fontWeight: "600",
     marginTop: 12,
     marginBottom: 6,
-    color: "#333",
+    color: "#3D4F64",
+    fontFamily: Fonts.bold,
+    textTransform: "uppercase",
   },
 
   rowBetween: {
@@ -316,8 +319,9 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontSize: 12,
-    color: "#777",
+    fontSize: 10,
+    letterSpacing: 2,
+    marginBottom: 4,
   },
 
   value: {

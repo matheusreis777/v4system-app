@@ -10,6 +10,8 @@ import {
   Platform,
 } from "react-native";
 import { useMemo, useState } from "react";
+import { Fonts } from "../../styles/fonts";
+import { useTheme } from "../../contexts/ThemeContext";
 
 export interface LookupItem {
   id: number;
@@ -31,6 +33,7 @@ export function FilterDropdown({
   onChange,
   placeholder = "Selecione...",
 }: FilterDropdownProps) {
+  const { theme } = useTheme();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
 
@@ -131,26 +134,31 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#334155",
-    marginBottom: 6,
+    fontSize: 11,
+    color: "#3D4F64",
+    marginBottom: 8,
+    fontFamily: "Barlow-Bold",
+    textTransform: "uppercase",
+    letterSpacing: 3,
   },
 
   field: {
     height: 52,
-    backgroundColor: "#F1F5F9",
+    backgroundColor: "#EDF0F4",
     borderRadius: 12,
     paddingHorizontal: 14,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    borderWidth: 1,
+    borderColor: "#EDF0F4",
   },
 
   value: {
     fontSize: 15,
-    color: "#0F172A",
+    color: "#3D4F64",
     flex: 1,
+    fontFamily: "Barlow-Regular",
   },
 
   placeholder: {
@@ -185,11 +193,12 @@ const styles = StyleSheet.create({
 
   searchInput: {
     height: 44,
-    backgroundColor: "#F8FAFC",
+    backgroundColor: "#EDF0F4",
     borderRadius: 10,
     paddingHorizontal: 12,
     fontSize: 15,
     color: "#0F172A",
+    fontFamily: "Barlow-Regular",
   },
 
   list: {
@@ -205,7 +214,8 @@ const styles = StyleSheet.create({
 
   optionText: {
     fontSize: 16,
-    color: "#0F172A",
+    color: "#3D4F64",
+    fontFamily: "Barlow-Regular",
   },
 
   emptyText: {

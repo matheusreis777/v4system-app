@@ -19,6 +19,7 @@ import Button from "../../components/Button";
 import ToastService from "./../../components/alerts/ToastService";
 import { useAuth } from "../../contexts/AuthContext";
 import { useLoading } from "../../contexts/LoadingContext";
+import { useTheme } from "../../contexts/ThemeContext";
 
 function validateStrongPassword(password: string) {
   const errors: string[] = [];
@@ -56,6 +57,7 @@ export default function Forgot() {
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
   const { validatePhone, trocaSenha } = useAuth();
   const { showLoading, hideLoading } = useLoading();
+  const { theme } = useTheme();
 
   useEffect(() => {
     const showSub = Keyboard.addListener("keyboardDidShow", () => {
@@ -178,7 +180,7 @@ export default function Forgot() {
 
   return (
       <KeyboardAvoidingView
-        style={{ flex: 1, width: "100%" }}
+        style={{ flex: 1, width: "100%", backgroundColor: theme.background }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
         keyboardVerticalOffset={Platform.OS === "ios" ? 20 : 0}
       >
@@ -202,7 +204,7 @@ export default function Forgot() {
             />
 
             {/* Título */}
-            <Text style={styles.subtitle}>Sistema de Gestão CRM</Text>
+            <Text style={[styles.subtitle, { color: theme.primary, fontFamily: Fonts.condensedBold }]}>SISTEMA DE GESTÃO CRM</Text>
 
             <Text style={styles.subtitle}>Recuperar Senha</Text>
 
@@ -319,7 +321,7 @@ export default function Forgot() {
           </View>
 
           {/* Rodapé */}
-          <Text style={styles.footer}>© 2026 V4 System</Text>
+          <Text style={styles.footer}>© 2026 ConnectCar System</Text>
         </ScrollView>
       </KeyboardAvoidingView>
   );
@@ -372,10 +374,10 @@ const styles = StyleSheet.create({
 
   subtitle: {
     fontSize: 16,
-    color: "#545455",
     marginBottom: 10,
     textAlign: "center",
-    fontFamily: Fonts.medium,
+    letterSpacing: 2,
+    textTransform: "uppercase",
   },
 
   label: {
@@ -401,9 +403,9 @@ const styles = StyleSheet.create({
 
   forgot: {
     marginTop: 20,
-    color: "#2563EB",
-    fontSize: 14,
-    fontFamily: Fonts.regular,
+    color: "#FF8000",
+    fontSize: 15,
+    fontFamily: Fonts.medium,
   },
 
   footer: {

@@ -1,6 +1,9 @@
 export const Fonts = {
-  regular: "Poppins-Regular",
-  medium: "Poppins-Medium",
-  semibold: "Poppins-SemiBold",
-  bold: "Poppins-Bold",
+  regular: "Barlow-Regular",
+  medium: "Barlow-Medium",
+  semibold: "Barlow-SemiBold",
+  bold: "Barlow-Bold",
+  condensedSemiBold: "BarlowCondensed-SemiBold",
+  condensedBold: "BarlowCondensed-Bold",
+  condensedBlack: "BarlowCondensed-Black",
 };

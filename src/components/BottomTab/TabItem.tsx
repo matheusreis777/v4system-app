@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { Animated, TouchableOpacity, Text, StyleSheet } from "react-native";
+import { Fonts } from "../../styles/fonts";
 
 interface TabItemProps {
   label: string;
@@ -74,8 +75,9 @@ const styles = StyleSheet.create({
     paddingTop: 8,
   },
   label: {
-    fontSize: 11,
-    color: "#FFFFFF",
-    fontWeight: "600",
+    fontSize: 10,
+    color: "#FF8000",
+    fontFamily: Fonts.medium,
+    marginTop: 4,
   },
 });

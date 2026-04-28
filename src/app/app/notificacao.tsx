@@ -15,10 +15,13 @@ import {
   NotificacaoDto,
 } from "../../services/notificacaoService";
 import { router } from "expo-router";
+import { Fonts } from "../../styles/fonts";
+import { useTheme } from "../../contexts/ThemeContext";
 
 export default function Notificacao() {
   const [notificacoes, setNotificacoes] = useState<NotificacaoDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const { theme } = useTheme();
 
   useEffect(() => {
     carregarNotificacoes();
@@ -82,11 +85,11 @@ export default function Notificacao() {
     <>
       <Header title="Notificações" />
 
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         {loading ? (
           <ActivityIndicator size="large" color="#1e88e5" />
         ) : notificacoes.length === 0 ? (
-          <Text style={styles.vazio}>Nenhuma notificação encontrada</Text>
+          <Text style={[styles.vazio, { fontFamily: Fonts.regular }]}>Nenhuma notificação encontrada</Text>
         ) : (
           <FlatList
             data={notificacoes}
@@ -121,21 +124,22 @@ const styles = StyleSheet.create({
   },
 
   cardNaoLido: {
-    borderLeftWidth: 5,
-    borderLeftColor: "#1e88e5",
+    borderLeftWidth: 4,
+    borderLeftColor: "#FF8000",
   },
 
   titulo: {
     fontSize: 16,
-    fontWeight: "bold",
     marginBottom: 6,
-    color: "#111",
+    color: "#061D3D",
+    fontFamily: Fonts.bold,
   },
 
   mensagem: {
     fontSize: 14,
-    color: "#444",
+    color: "#3D4F64",
     marginBottom: 10,
+    fontFamily: Fonts.regular,
   },
 
   data: {

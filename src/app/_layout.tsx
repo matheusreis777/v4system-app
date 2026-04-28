@@ -16,6 +16,13 @@ SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const [loaded, error] = useFonts({
+    "Barlow-Regular": require("../../assets/fonts/Barlow-Regular.ttf"),
+    "Barlow-Medium": require("../../assets/fonts/Barlow-Medium.ttf"),
+    "Barlow-SemiBold": require("../../assets/fonts/Barlow-SemiBold.ttf"),
+    "Barlow-Bold": require("../../assets/fonts/Barlow-Bold.ttf"),
+    "BarlowCondensed-SemiBold": require("../../assets/fonts/BarlowCondensed-SemiBold.ttf"),
+    "BarlowCondensed-Bold": require("../../assets/fonts/BarlowCondensed-Bold.ttf"),
+    "BarlowCondensed-Black": require("../../assets/fonts/BarlowCondensed-Black.ttf"),
     "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
     "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
     "Poppins-SemiBold": require("../../assets/fonts/Poppins-SemiBold.ttf"),

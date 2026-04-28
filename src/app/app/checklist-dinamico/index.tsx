@@ -12,6 +12,8 @@ import Header from "../../../components/Header/Header";
 import { useLocalSearchParams, router } from "expo-router";
 import { avaliacaoService } from "../../../services/avaliacaoService";
 import { questionarioService } from "../../../services/questionarioService";
+import { Fonts } from "../../../styles/fonts";
+import { useTheme } from "../../../contexts/ThemeContext";
 
 interface ChecklistItem {
   id: number;
@@ -24,6 +26,7 @@ export default function ChecklistDinamico() {
 
   const [checklist, setChecklist] = useState<ChecklistItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const { theme } = useTheme();
 
   useEffect(() => {
     async function carregarChecklist() {
@@ -66,7 +69,7 @@ export default function ChecklistDinamico() {
   }, []);
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <Header
         title="Checklist de Avaliação"
         leftIcon="chevron-left"
@@ -83,11 +86,11 @@ export default function ChecklistDinamico() {
             contentContainerStyle={{ padding: 16 }}
             renderItem={({ item }) => (
               <View style={styles.card}>
-                <Text style={styles.pergunta}>{item.pergunta}</Text>
+                <Text style={[styles.pergunta, { fontFamily: Fonts.bold, color: theme.primary }]}>{item.pergunta.toUpperCase()}</Text>
 
-                <View style={styles.respostaBox}>
-                  <Text style={styles.respostaLabel}>Resposta</Text>
-                  <Text style={styles.respostaTexto}>{item.resposta}</Text>
+                <View style={[styles.respostaBox, { backgroundColor: "#EDF0F4" }]}>
+                  <Text style={[styles.respostaLabel, { fontFamily: Fonts.bold, color: theme.primary }]}>RESPOSTA</Text>
+                  <Text style={[styles.respostaTexto, { color: theme.accent, fontFamily: Fonts.bold }]}>{item.resposta}</Text>
                 </View>
               </View>
             )}
@@ -106,7 +109,6 @@ export default function ChecklistDinamico() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#e6e8ea",
   },
   container: {
     flex: 1,
@@ -134,9 +136,9 @@ const styles = StyleSheet.create({
   },
 
   respostaLabel: {
-    fontSize: 12,
-    color: "#666",
+    fontSize: 10,
     marginBottom: 4,
+    letterSpacing: 2,
   },
 
   respostaTexto: {

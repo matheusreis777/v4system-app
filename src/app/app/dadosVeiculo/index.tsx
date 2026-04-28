@@ -12,6 +12,8 @@ import Header from "../../../components/Header/Header";
 import { useLocalSearchParams, router } from "expo-router";
 import { questionarioService } from "../../../services/questionarioService";
 import { maskPlate } from "../../../utils/masks";
+import { Fonts } from "../../../styles/fonts";
+import { useTheme } from "../../../contexts/ThemeContext";
 
 interface QuestionarioPorEmpresa {
   id: number;
@@ -51,6 +53,7 @@ export default function Checklist() {
     [],
   );
   const [loading, setLoading] = useState(true);
+  const { theme } = useTheme();
 
   // 🔹 carregar empresaId
   useEffect(() => {
@@ -88,7 +91,7 @@ export default function Checklist() {
   }
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <Header
         title="Dados do Veículo"
         leftIcon="chevron-left"
@@ -99,44 +102,44 @@ export default function Checklist() {
         {veiculo && (
           <View style={styles.card}>
             <View style={styles.cardTop}>
-              <Text style={styles.placa}>{maskPlate(veiculo.placa)}</Text>
-              <View style={styles.statusBadge}>
-                <Text style={styles.statusText}>{veiculo.statusVeiculo}</Text>
+              <Text style={[styles.placa, { fontFamily: Fonts.condensedBold, color: theme.primary }]}>{maskPlate(veiculo.placa)}</Text>
+              <View style={[styles.statusBadge, { backgroundColor: theme.mode === "light" ? "#EDF0F4" : "#1A4480" }]}>
+                <Text style={[styles.statusText, { color: theme.text, fontFamily: Fonts.medium }]}>{veiculo.statusVeiculo.toUpperCase()}</Text>
               </View>
             </View>
 
-            <Text style={styles.title}>
+            <Text style={[styles.title, { fontFamily: Fonts.bold, color: theme.text }]}>
               {veiculo.tipoVeiculo} • {veiculo.marca} {veiculo.modelo}
             </Text>
 
             <View style={styles.infoGrid}>
               <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Ano</Text>
-                <Text style={styles.infoValue}>
+                <Text style={[styles.infoLabel, { fontFamily: Fonts.bold, color: theme.primary }]}>ANO</Text>
+                <Text style={[styles.infoValue, { fontFamily: Fonts.medium, color: theme.text }]}>
                   {veiculo.anoModelo}/{veiculo.anoFabricacao}
                 </Text>
               </View>
 
               <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>KM</Text>
-                <Text style={styles.infoValue}>
+                <Text style={[styles.infoLabel, { fontFamily: Fonts.bold, color: theme.primary }]}>KM</Text>
+                <Text style={[styles.infoValue, { fontFamily: Fonts.medium, color: theme.text }]}>
                   {veiculo.km.toLocaleString()} km
                 </Text>
               </View>
 
               <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Cor</Text>
-                <Text style={styles.infoValue}>{veiculo.cor}</Text>
+                <Text style={[styles.infoLabel, { fontFamily: Fonts.bold, color: theme.primary }]}>COR</Text>
+                <Text style={[styles.infoValue, { fontFamily: Fonts.medium, color: theme.text }]}>{veiculo.cor}</Text>
               </View>
 
               <View style={styles.infoItem}>
-                <Text style={styles.infoLabel}>Combustível</Text>
-                <Text style={styles.infoValue}>{veiculo.combustivel}</Text>
+                <Text style={[styles.infoLabel, { fontFamily: Fonts.bold, color: theme.primary }]}>COMBUSTÍVEL</Text>
+                <Text style={[styles.infoValue, { fontFamily: Fonts.medium, color: theme.text }]}>{veiculo.combustivel}</Text>
               </View>
 
               <View style={styles.infoItemValor}>
-                <Text style={styles.infoLabel}>Valor Venda</Text>
-                <Text style={styles.infoValue}>
+                <Text style={[styles.infoLabel, { fontFamily: Fonts.bold, color: theme.primary }]}>VALOR VENDA</Text>
+                <Text style={[styles.infoValue, { color: theme.accent, fontFamily: Fonts.condensedBold, fontSize: 18 }]}>
                   R${" "}
                   {veiculo.valorVenda?.toLocaleString("pt-BR", {
                     minimumFractionDigits: 2,
@@ -177,7 +180,6 @@ export default function Checklist() {
 const styles = StyleSheet.create({
   screen: {
     flex: 1,
-    backgroundColor: "#e6e8ea",
   },
   container: {
     flex: 1,
@@ -250,9 +252,8 @@ const styles = StyleSheet.create({
   },
 
   statusText: {
-    color: "#2e7d32",
-    fontWeight: "600",
-    fontSize: 12,
+    fontSize: 10,
+    letterSpacing: 1,
   },
 
   title: {
@@ -269,6 +270,11 @@ const styles = StyleSheet.create({
   },
   infoItem: { width: "48%" },
   infoItemValor: { width: "100%", alignItems: "flex-end" },
-  infoLabel: { fontSize: 12, color: "#777" },
-  infoValue: { fontSize: 14, fontWeight: "600", color: "#222" },
+  infoLabel: {
+    fontSize: 10,
+    letterSpacing: 2,
+    marginBottom: 2,
+    textTransform: "uppercase",
+  },
+  infoValue: { fontSize: 14 },
 });

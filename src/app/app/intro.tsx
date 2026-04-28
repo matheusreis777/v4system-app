@@ -13,11 +13,14 @@ import { Feather } from "@expo/vector-icons";
 import Button from "../../components/Button";
 import { useAuth } from "../../contexts/AuthContext";
 import { router } from "expo-router";
+import { useTheme } from "../../contexts/ThemeContext";
+import { Fonts } from "../../styles/fonts";
 
 export default function Intro() {
   const [nameUser, setNameUser] = useState("");
   const [empresas, setEmpresas] = useState<any[]>([]);
   const { signOut } = useAuth();
+  const { theme } = useTheme();
 
   async function handleSignOut() {
     await signOut();
@@ -45,15 +48,13 @@ export default function Intro() {
   }, []);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.background }]}>
       <StatusBar barStyle="dark-content" />
 
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Olá, {nameUser} 👋</Text>
-        <Text style={styles.subtitle}>
-          Escolha a empresa que deseja acessar
-        </Text>
+        <Text style={[styles.title, { color: theme.primary, fontFamily: Fonts.condensedBold }]}>Olá, {nameUser} 👋</Text>
+        <Text style={[styles.subtitle, { color: theme.text, fontFamily: Fonts.medium }]}>Escolha a empresa que deseja acessar</Text>
       </View>
 
       {/* Lista de empresas */}
@@ -69,13 +70,13 @@ export default function Intro() {
             onPress={() => selectEmpresa(item)}
           >
             <View style={styles.cardLeft}>
-              <View style={styles.iconBox}>
-                <Feather name="briefcase" size={22} color="#2563EB" />
+              <View style={[styles.iconBox, { backgroundColor: theme.mode === "light" ? "#FFF0E0" : "#CC6600" }]}>
+                <Feather name="briefcase" size={22} color={theme.accent} />
               </View>
-              <Text style={styles.nomeEmpresa}>{item.nome}</Text>
+              <Text style={[styles.nomeEmpresa, { color: theme.text, fontFamily: Fonts.medium }]}>{item.nome}</Text>
             </View>
 
-            <Feather name="chevron-right" size={22} color="#94A3B8" />
+            <Feather name="chevron-right" size={22} color={theme.accent} />
           </TouchableOpacity>
         )}
         ListEmptyComponent={
@@ -113,8 +114,9 @@ const styles = StyleSheet.create({
 
   subtitle: {
     fontSize: 15,
-    color: "#475569",
+    color: "#7A8CA3",
     textAlign: "center",
+    fontFamily: Fonts.regular,
   },
 
   list: {
@@ -124,9 +126,9 @@ const styles = StyleSheet.create({
 
   card: {
     backgroundColor: "#FFFFFF",
-    borderRadius: 14,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 16,
+    padding: 18,
+    marginBottom: 14,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",

@@ -13,17 +13,23 @@ export default function Button({ title, ...rest }: Props) {
   const styles = StyleSheet.create({
     button: {
       width: "100%",
-      height: 48,
-      backgroundColor: "#1844a2",
-      borderRadius: 8,
+      height: 50,
+      backgroundColor: theme.buttonBackground,
+      borderRadius: 12,
       justifyContent: "center",
       alignItems: "center",
+      shadowColor: theme.buttonBackground,
+      shadowOpacity: 0.3,
+      shadowRadius: 10,
+      shadowOffset: { width: 0, height: 4 },
+      elevation: 5,
     },
     title: {
-      color: "#fff",
+      color: theme.buttonText,
       fontSize: 16,
-      fontWeight: "bold",
-      fontFamily: "Poppins",
+      fontFamily: "Barlow-Bold",
+      textTransform: "uppercase",
+      letterSpacing: 1.2,
     },
   });
   return (

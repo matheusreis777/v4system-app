@@ -1,5 +1,6 @@
 import { View, ActivityIndicator, StyleSheet, Text } from "react-native";
 import { useLoading } from "../contexts/LoadingContext";
+import { Fonts } from "../styles/fonts";
 
 export default function LoadingOverlay() {
   const { loading } = useLoading();
@@ -8,8 +9,8 @@ export default function LoadingOverlay() {
 
   return (
     <View style={styles.overlay}>
-      <ActivityIndicator size="large" color="#2563EB" />
-      <Text style={styles.text}>Carregando...</Text>
+      <ActivityIndicator size="large" color="#FF8000" />
+      <Text style={[styles.text, { fontFamily: Fonts.medium }]}>Processando...</Text>
     </View>
   );
 }

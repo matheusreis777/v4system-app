@@ -11,6 +11,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { router } from "expo-router";
+import { Fonts } from "../../styles/fonts";
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface HeaderProps {
   title: string;
@@ -31,6 +33,7 @@ export default function Header({
   rightIcons = [],
 }: HeaderProps) {
   const insets = useSafeAreaInsets();
+  const { theme } = useTheme();
   const [empresa, setEmpresa] = useState<string | null>(null);
 
   useEffect(() => {
@@ -44,9 +47,9 @@ export default function Header({
 
   return (
     <LinearGradient
-      colors={["#2563EB", "#1844a2"]}
+      colors={["#061D3D", "#1A4480"]}
       start={{ x: 0, y: 0 }}
-      end={{ x: 0, y: 1 }}
+      end={{ x: 1, y: 0 }}
       style={[
         styles.gradient,
         {
@@ -68,15 +71,15 @@ export default function Header({
         <View style={styles.center}>
           {empresa && (
             <Text
-              style={styles.subtitle}
+              style={[styles.subtitle, { fontFamily: Fonts.medium }]}
               numberOfLines={1}
               onPress={() => router.replace("/app/intro")}
             >
               {empresa}
             </Text>
           )}
-          <Text style={styles.title} numberOfLines={2}>
-            {title}
+          <Text style={[styles.title, { fontFamily: Fonts.condensedBold }]} numberOfLines={2}>
+            {title.toUpperCase()}
           </Text>
         </View>
 
@@ -134,16 +137,17 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontSize: 20,
-    fontWeight: "700",
+    fontSize: 22,
     color: "#ffffff",
+    letterSpacing: 1.5,
   },
 
   subtitle: {
     marginTop: 2,
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#ffffff",
+    fontSize: 13,
+    color: "#FF8000",
+    textTransform: "uppercase",
+    letterSpacing: 2,
   },
 
   iconButton: {

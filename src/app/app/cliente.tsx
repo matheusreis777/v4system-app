@@ -9,6 +9,7 @@ import {
   FlatList,
   ActivityIndicator,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import BottomTab from "../../components/BottomTab/BottomTab";
 import Header from "../../components/Header/Header";
 import { Feather } from "@expo/vector-icons";
@@ -17,6 +18,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
+import { Fonts } from "../../styles/fonts";
+import { useTheme } from "../../contexts/ThemeContext";
 
 import { clienteService } from "../../services/clienteService";
 import { ClienteFiltro } from "../../models/clienteFiltro";
@@ -58,6 +61,7 @@ export const onlyNumbers = (value?: string) =>
 export default function Cliente() {
   const [empresaId, setEmpresaId] = useState<number | null>(null);
   const [showFilters, setShowFilters] = useState(false);
+  const { theme } = useTheme();
 
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [filters, setFilters] = useState<FiltrosCliente>(filtrosIniciais());
@@ -174,19 +178,19 @@ export default function Cliente() {
   function renderCliente({ item }: { item: Cliente }) {
     return (
       <View style={styles.card}>
-        <Text style={styles.nome}>{item.nome}</Text>
+        <Text style={[styles.nome, { color: theme.primary, fontFamily: Fonts.bold }]}>{item.nome}</Text>
 
         <View style={styles.row}>
           <View style={styles.inlineItem}>
-            <Feather name="credit-card" size={14} color="#666" />
-            <Text style={styles.inlineText}>
+            <Feather name="credit-card" size={14} color={theme.accent} />
+            <Text style={[styles.inlineText, { fontFamily: Fonts.medium }]}>
               {maskCPF(item.cpfCnpj) || "—"}
             </Text>
           </View>
 
           <View style={styles.inlineItem}>
-            <Feather name="phone" size={14} color="#666" />
-            <Text style={styles.inlineText}>
+            <Feather name="phone" size={14} color={theme.accent} />
+            <Text style={[styles.inlineText, { fontFamily: Fonts.medium }]}>
               {maskPhone(item.telefone) || "—"}
             </Text>
           </View>
@@ -195,18 +199,23 @@ export default function Cliente() {
         <View style={styles.divider} />
 
         <View style={styles.emailRow}>
-          <Feather name="mail" size={14} color="#666" />
-          <Text style={styles.emailText}>{item.email || "—"}</Text>
+          <Feather name="mail" size={14} color={theme.accent} />
+          <Text style={[styles.emailText, { fontFamily: Fonts.regular }]}>{item.email || "—"}</Text>
         </View>
       </View>
     );
   }
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <Header title="Listagem de Clientes" />
 
-      <View style={styles.filtersHeader}>
+      <LinearGradient
+        colors={["#061D3D", "#1A4480"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.filtersHeader}
+      >
         <TouchableOpacity
           style={styles.filterButton}
           onPress={() => setShowFilters((prev) => !prev)}
@@ -218,7 +227,7 @@ export default function Cliente() {
         <TouchableOpacity onPress={limpar}>
           <Text style={styles.clearText}>Limpar</Text>
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
 
       {showFilters && (
         <View style={styles.filtersScroll}>
@@ -290,23 +299,22 @@ export default function Cliente() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#e6e8ea" },
+  screen: { flex: 1 },
 
   filtersHeader: {
-    padding: 16,
-    backgroundColor: "#1844a2",
+    marginHorizontal: 16,
+    marginTop: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-end",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    marginTop: -30,
-    height: 80,
+    alignItems: "center",
+    borderRadius: 14,
   },
 
   filterButton: { flexDirection: "row", gap: 6 },
-  filterText: { color: "#ffffff", fontWeight: "600", fontSize: 18 },
-  clearText: { color: "#ffffff", fontSize: 18, fontWeight: "600" },
+  filterText: { color: "#ffffff", fontFamily: Fonts.condensedBold, fontSize: 18, textTransform: "uppercase" },
+  clearText: { color: "#ffffff", fontSize: 16, fontFamily: Fonts.medium, textTransform: "uppercase" },
 
   filtersBox: {
     backgroundColor: "#fff",
@@ -328,8 +336,6 @@ const styles = StyleSheet.create({
 
   nome: {
     fontSize: 16,
-    fontWeight: "700",
-    color: "#1844a2",
     marginBottom: 10,
     textTransform: "uppercase",
   },

@@ -16,6 +16,8 @@ import Button from "../../components/Button";
 import ToastService from "../../components/alerts/ToastService";
 import { novoLeadService } from "../../services/novoLeadService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Fonts } from "../../styles/fonts";
+import { useTheme } from "../../contexts/ThemeContext";
 
 export default function NovoLead() {
   const [nome, setNome] = useState("");
@@ -25,6 +27,7 @@ export default function NovoLead() {
   const [observacao, setObservacao] = useState("");
   const [errors, setErrors] = useState<any>({});
   const [loading, setLoading] = useState(false);
+  const { theme } = useTheme();
 
   // ============================
   // Utils
@@ -122,7 +125,7 @@ export default function NovoLead() {
         onLeftPress={router.back}
       />
 
-      <View style={styles.container}>
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
           behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -133,8 +136,8 @@ export default function NovoLead() {
             showsVerticalScrollIndicator={false}
           >
             {/* NOME */}
-            <Text>
-              Nome <Text style={styles.obrigatorios}>*</Text>
+            <Text style={[styles.label, { fontFamily: Fonts.bold, color: theme.primary }]}>
+              NOME <Text style={styles.obrigatorios}>*</Text>
             </Text>
             <Input
               placeholder="Nome do lead"
@@ -147,8 +150,8 @@ export default function NovoLead() {
             {errors.nome && <Text style={styles.error}>{errors.nome}</Text>}
 
             {/* TELEFONE */}
-            <Text>
-              Telefone <Text style={styles.obrigatorios}>*</Text>
+            <Text style={[styles.label, { fontFamily: Fonts.bold, color: theme.primary }]}>
+              TELEFONE <Text style={styles.obrigatorios}>*</Text>
             </Text>
             <Input
               placeholder="Telefone do lead"
@@ -175,8 +178,8 @@ export default function NovoLead() {
             />
 
             {/* DESCRIÇÃO */}
-            <Text>
-              Descrição Inicial <Text style={styles.obrigatorios}>*</Text>
+            <Text style={[styles.label, { fontFamily: Fonts.bold, color: theme.primary }]}>
+              DESCRIÇÃO INICIAL <Text style={styles.obrigatorios}>*</Text>
             </Text>
             <Input
               placeholder="Descrição inicial do lead"
@@ -219,8 +222,15 @@ const styles = StyleSheet.create({
   filtersBox: {
     backgroundColor: "#fff",
     marginHorizontal: 16,
-    padding: 16,
-    borderRadius: 12,
+    padding: 18,
+    borderRadius: 16,
+    marginTop: 20,
+  },
+  label: {
+    fontSize: 11,
+    letterSpacing: 2,
+    marginBottom: 4,
+    textTransform: "uppercase",
   },
   observacao: {
     height: 120,

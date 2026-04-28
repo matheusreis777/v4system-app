@@ -9,10 +9,12 @@ import {
   Alert,
   ActivityIndicator,
   Animated,
+  TextInput,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import BottomTab from "../../components/BottomTab/BottomTab";
 import Header from "../../components/Header/Header";
-import { useEffect, useState, useCallback } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Feather } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
@@ -25,8 +27,9 @@ import Button from "../../components/Button";
 import { estoqueService } from "../../services/estoqueService";
 import { EstoqueFiltro } from "../../models/estoqueFiltro";
 import { EstoqueRetorno } from "../../models/estoqueRetorno";
-import { useRef } from "react";
 import { router } from "expo-router";
+import { Fonts } from "../../styles/fonts";
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface Veiculo {
   id: number;
@@ -60,6 +63,7 @@ export default function Estoque() {
 
   const { tipoVeiculo, marca, modelo, statusVeiculo, reload } =
     useLookupsEstoque();
+  const { theme } = useTheme();
 
   const emptyAnim = useState(new Animated.Value(0))[0];
 
@@ -251,19 +255,19 @@ export default function Estoque() {
       >
         {/* HEADER */}
         <View style={styles.cardHeader}>
-          <Text style={styles.placa}>{maskPlate(item.placa)}</Text>
+          <Text style={[styles.placa, { color: theme.primary, fontFamily: Fonts.condensedBold }]}>{maskPlate(item.placa)}</Text>
 
-          <View style={styles.statusBadge}>
-            <Text style={styles.statusText}>{item.statusVeiculo}</Text>
+          <View style={[styles.statusBadge, { backgroundColor: theme.mode === "light" ? "#EDF0F4" : "#1A4480" }]}>
+            <Text style={[styles.statusText, { color: theme.text, fontFamily: Fonts.medium }]}>{item.statusVeiculo.toUpperCase()}</Text>
           </View>
         </View>
 
         {/* VEÍCULO */}
-        <Text style={styles.title} numberOfLines={1}>
+        <Text style={[styles.title, { color: theme.primary, fontFamily: Fonts.bold }]} numberOfLines={1}>
           {item.marca} {item.modelo}
         </Text>
 
-        <Text style={styles.subtitle}>
+        <Text style={[styles.subtitle, { fontFamily: Fonts.regular }]}>
           {item.tipoVeiculo} • {item.anoModelo}/{item.anoFabricacao}
         </Text>
 
@@ -275,7 +279,7 @@ export default function Estoque() {
         </View>
 
         {/* VALOR */}
-        <Text style={styles.valor}>
+        <Text style={[styles.valor, { color: theme.accent, fontFamily: Fonts.condensedBold }]}>
           R${" "}
           {item.valorVenda?.toLocaleString("pt-BR", {
             minimumFractionDigits: 2,
@@ -286,10 +290,15 @@ export default function Estoque() {
   }
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <Header title="Listagem de Veículos" />
 
-      <View style={styles.filtersHeader}>
+      <LinearGradient
+        colors={["#061D3D", "#1A4480"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.filtersHeader}
+      >
         <TouchableOpacity
           style={styles.filterButton}
           onPress={() => setShowFilters(!showFilters)}
@@ -301,7 +310,7 @@ export default function Estoque() {
         <TouchableOpacity onPress={limpar}>
           <Text style={styles.clearText}>Limpar</Text>
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
 
       {showFilters && (
         <View style={styles.filtersScroll}>
@@ -379,24 +388,25 @@ export default function Estoque() {
 
       {!showFilters && (
         <View style={styles.container}>
-          <View style={styles.searchBox}>
-            <View style={styles.searchRow}>
-              <View style={styles.inputWrapper}>
-                <Input
-                  value={filters.placa}
-                  placeholder="Pesquise por placa (ABC-1D23)"
-                  maxLength={8}
-                  onChangeText={(t) =>
-                    setFilters((p) => ({ ...p, placa: maskPlate(t) }))
-                  }
-                />
-              </View>
-
-              <Button
-                onPress={aplicarFiltros}
-                title="Filtrar"
-                style={styles.filterButtonSmall}
+          <View style={styles.searchContainer}>
+            <View style={[styles.searchBar, { backgroundColor: theme.mode === "light" ? "#fff" : "#1A4480" }]}>
+              <Feather name="search" size={20} color={theme.accent} style={styles.searchIcon} />
+              <TextInput
+                value={filters.placa}
+                placeholder="Qual placa você procura?"
+                placeholderTextColor={theme.mode === "light" ? "#94A3B8" : "#888"}
+                maxLength={8}
+                style={[styles.searchInput, { color: theme.text, fontFamily: Fonts.medium }]}
+                onChangeText={(t) =>
+                  setFilters((p) => ({ ...p, placa: maskPlate(t) }))
+                }
+                onSubmitEditing={aplicarFiltros}
               />
+              {filters.placa.length > 0 && (
+                <TouchableOpacity onPress={() => setFilters(p => ({ ...p, placa: "" }))}>
+                  <Feather name="x" size={18} color="#94A3B8" />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
 
@@ -432,18 +442,17 @@ export default function Estoque() {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#e6e8ea" },
+  screen: { flex: 1 },
 
   filtersHeader: {
-    padding: 16,
-    backgroundColor: "#1844a2",
+    marginHorizontal: 16,
+    marginTop: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-end",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    marginTop: -30,
-    height: 80,
+    alignItems: "center",
+    borderRadius: 14,
   },
 
   filtersBox: {
@@ -456,24 +465,34 @@ const styles = StyleSheet.create({
 
   filtersScroll: { height: "70%", marginTop: 20 },
   filterButton: { flexDirection: "row", gap: 6 },
-  filterText: { color: "#ffffff", fontWeight: "600", fontSize: 18 },
-  clearText: { color: "#ffffff", fontSize: 18, fontWeight: "600" },
+  filterText: { color: "#ffffff", fontFamily: Fonts.condensedBold, fontSize: 18, textTransform: "uppercase" },
+  clearText: { color: "#ffffff", fontSize: 16, fontFamily: Fonts.medium, textTransform: "uppercase" },
+
+  searchContainer: {
+    marginBottom: 16,
+  },
+  searchBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    height: 54,
+    borderRadius: 27,
+    paddingHorizontal: 18,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
+  },
+  searchIcon: {
+    marginRight: 12,
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
+    height: "100%",
+  },
 
   container: { padding: 16, flex: 1 },
-
-  searchBox: { borderRadius: 16 },
-  searchRow: { flexDirection: "row", alignItems: "center" },
-  inputWrapper: { flex: 1, marginRight: 8 },
-
-  filterButtonSmall: {
-    height: 48,
-    backgroundColor: "#1844a2",
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 10,
-    marginBottom: 14,
-  },
 
   cardTop: {
     flexDirection: "row",
@@ -529,9 +548,8 @@ const styles = StyleSheet.create({
   },
 
   placa: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#1844a2",
+    fontSize: 18,
+    letterSpacing: 1,
   },
 
   statusBadge: {
@@ -573,9 +591,7 @@ const styles = StyleSheet.create({
   },
 
   valor: {
-    fontSize: 16,
-    fontWeight: "800",
-    color: "#1844a2",
+    fontSize: 18,
     textAlign: "right",
   },
 });

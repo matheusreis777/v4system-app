@@ -1,6 +1,6 @@
   {
     "expo": {
-      "name": "V4 System",
+      "name": "ConnectCar System",
       "slug": "v4system-app",
       "scheme": "v4system",
       "version": "1.0.0",
@@ -11,7 +11,7 @@
       "splash": {
         "image": "./assets/splash-icon.png",
         "resizeMode": "contain",
-        "backgroundColor": "#ffffff"
+        "backgroundColor": "#061D3D"
       },
       "ios": {
         "supportsTablet": true,
@@ -21,7 +21,15 @@
         "package": "com.v4system.crm",
         "adaptiveIcon": {
           "foregroundImage": "./assets/icon.png",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#061D3D"
+        },
+        "statusBar": {
+          "backgroundColor": "#061D3D",
+          "statusBarStyle": "light-content"
+        },
+        "navigationBar": {
+          "backgroundColor": "#061D3D",
+          "buttonColor": "light"
         },
         "googleServicesFile": "./google-services.json",
         "edgeToEdgeEnabled": true,

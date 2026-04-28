@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
+import { Fonts } from "../../styles/fonts";
 
 interface TagProps {
   label: string;
@@ -9,7 +10,7 @@ export function Tag({ label, color }: TagProps) {
   return (
     <View style={[styles.tag, { backgroundColor: color }]}>
       <Text style={styles.text} numberOfLines={1}>
-        {label}
+        {label.toUpperCase()}
       </Text>
     </View>
   );
@@ -17,15 +18,18 @@ export function Tag({ label, color }: TagProps) {
 
 const styles = StyleSheet.create({
   tag: {
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
     marginRight: 6,
     marginBottom: 6,
+    borderWidth: 0.5,
+    borderColor: "rgba(0,0,0,0.1)",
   },
   text: {
-    fontSize: 12,
-    fontWeight: "600",
+    fontSize: 10,
+    fontFamily: Fonts.medium,
     color: "#ffffff",
+    letterSpacing: 0.5,
   },
 });

@@ -9,9 +9,13 @@ import {
   ScrollView,
   Platform,
   Pressable,
+  StatusBar as RNStatusBar,
 } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { Fonts } from "../../styles/fonts";
+import { useTheme } from "../../contexts/ThemeContext";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import Header from "../../components/Header/Header";
 import BottomTab from "../../components/BottomTab/BottomTab";
 import { Feather } from "@expo/vector-icons";
@@ -55,6 +59,7 @@ export default function Painel() {
     vendedores,
     loading: loadingLookups,
   } = useLookups();
+  const { theme } = useTheme();
 
   const [showFilters, setShowFilters] = useState(false);
   const [loadingPainel, setLoadingPainel] = useState(false);
@@ -253,7 +258,8 @@ export default function Painel() {
   }
 
   return (
-    <View style={styles.screen}>
+    <View style={[styles.screen, { backgroundColor: theme.background }]}>
+      <RNStatusBar barStyle="light-content" />
       <Header
         title="Painel de Movimentações"
         leftIcon="chevron-left"
@@ -268,7 +274,12 @@ export default function Painel() {
         ]}
       />
 
-      <View style={styles.filtersHeader}>
+      <LinearGradient
+        colors={["#061D3D", "#1A4480"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 0 }}
+        style={styles.filtersHeader}
+      >
         <TouchableOpacity
           style={styles.filterButton}
           onPress={() => setShowFilters(!showFilters)}
@@ -280,7 +291,7 @@ export default function Painel() {
         <TouchableOpacity onPress={() => limpar()}>
           <Text style={styles.clearText}>Limpar</Text>
         </TouchableOpacity>
-      </View>
+      </LinearGradient>
 
       {showFilters && (
         <View style={styles.filtersScroll}>
@@ -332,7 +343,7 @@ export default function Painel() {
                 />
               )}
 
-              <Text style={styles.inputLabel}>Placa</Text>
+              <Text style={[styles.inputLabel, { fontFamily: Fonts.bold, color: theme.text }]}>PLACA</Text>
               <Input
                 value={filters.placa}
                 placeholder="ABC-1D23"
@@ -342,13 +353,13 @@ export default function Painel() {
                 }
               />
 
-              <Text style={styles.inputLabel}>Nome do Cliente</Text>
+              <Text style={[styles.inputLabel, { fontFamily: Fonts.bold, color: theme.text }]}>NOME DO CLIENTE</Text>
               <Input
                 value={filters.cliente}
                 onChangeText={(t) => setFilters((p) => ({ ...p, cliente: t }))}
               />
 
-              <Text style={styles.inputLabel}>Telefone</Text>
+              <Text style={[styles.inputLabel, { fontFamily: Fonts.bold, color: theme.text }]}>TELEFONE</Text>
               <Input
                 keyboardType="numeric"
                 placeholder="(99) 9 9999-9999"
@@ -454,8 +465,8 @@ function CardMovimentacao({ item, onCancel }: CardMovimentacaoProps) {
       style={styles.card}
       onPress={() => irParaDetalhes(item.movimentacaoId)}
     >
-      <View style={styles.cardHeader}>
-        <Text style={styles.cardTitle}>{item.clienteNome ?? "Cliente"}</Text>
+      <View style={[styles.cardHeader, { backgroundColor: "#061D3D" }]}>
+        <Text style={[styles.cardTitle, { fontFamily: Fonts.condensedBold }]}>{item.clienteNome ?? "Cliente"}</Text>
       </View>
 
       <View style={styles.cardInfoRow}>
@@ -517,31 +528,29 @@ function CardMovimentacao({ item, onCancel }: CardMovimentacaoProps) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: "#e6e8ea" },
+  screen: { flex: 1 },
 
   filtersHeader: {
-    padding: 16,
-    backgroundColor: "#1844a2",
+    marginHorizontal: 16,
+    marginTop: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 18,
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "flex-end",
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-
-    marginTop: -30,
-    height: 80,
+    alignItems: "center",
+    borderRadius: 14,
     marginBottom: 11,
 
-    elevation: 10,
+    elevation: 8,
     shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 6,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
   },
 
   filterButton: { flexDirection: "row", gap: 6 },
-  filterText: { color: "#ffffff", fontWeight: "600", fontSize: 18 },
-  clearText: { color: "#ffffff", fontSize: 18, fontWeight: "600" },
+  filterText: { color: "#ffffff", fontFamily: Fonts.condensedBold, fontSize: 18, textTransform: "uppercase" },
+  clearText: { color: "#ffffff", fontSize: 16, fontFamily: Fonts.medium, textTransform: "uppercase" },
 
   filtersBox: {
     backgroundColor: "#fff",
@@ -565,7 +574,12 @@ const styles = StyleSheet.create({
   chipText: { color: "#334155" },
   chipTextActive: { color: "#fff", fontWeight: "600" },
 
-  inputLabel: { marginTop: 12 },
+  inputLabel: {
+    marginTop: 12,
+    fontSize: 11,
+    letterSpacing: 2,
+    marginBottom: 4,
+  },
   input: {
     backgroundColor: "#F1F5F9",
     borderRadius: 10,
@@ -587,7 +601,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 
-  cardTitle: { color: "#fff", fontWeight: "600", textTransform: "uppercase" },
+  cardTitle: { color: "#fff", textTransform: "uppercase", fontSize: 16, letterSpacing: 1 },
   cardInfoRow: {
     marginTop: 10,
     flexDirection: "row",
