@@ -177,11 +177,6 @@ export default function Forgot() {
   };
 
   return (
-    <ImageBackground
-      source={require("../../../assets/background.png")}
-      style={[styles.container]}
-      resizeMode="cover"
-    >
       <KeyboardAvoidingView
         style={{ flex: 1, width: "100%" }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -201,7 +196,7 @@ export default function Forgot() {
           <View style={styles.card}>
             {/* Logo */}
             <Image
-              source={require("../../../assets/logo-v4system.png")}
+              source={require("../../../assets/logo.png")}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -327,7 +322,6 @@ export default function Forgot() {
           <Text style={styles.footer}>© 2026 V4 System</Text>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ImageBackground>
   );
 }
 
@@ -353,7 +347,7 @@ const styles = StyleSheet.create({
 
   logo: {
     width: 200,
-    height: 40,
+    height: 140,
     marginBottom: 4,
   },
 

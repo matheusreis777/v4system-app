@@ -20,14 +20,15 @@
       "android": {
         "package": "com.v4system.crm",
         "adaptiveIcon": {
-          "foregroundImage": "./assets/adaptive-icon.png",
+          "foregroundImage": "./assets/icon.png",
           "backgroundColor": "#ffffff"
         },
         "googleServicesFile": "./google-services.json",
         "edgeToEdgeEnabled": true,
         "softwareKeyboardLayoutMode": "pan",
-        "permissions": ["INTERNET"],
-        "usesCleartextTraffic": true
+        "permissions": [
+          "INTERNET"
+        ]
       },
       "plugins": [
         "expo-notifications",

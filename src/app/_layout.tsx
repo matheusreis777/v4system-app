@@ -9,9 +9,26 @@ import { LookupProviderEstoque } from "../contexts/LookupEstoqueContext";
 import { useEffect } from "react";
 import { useRouter } from "expo-router";
 import { registerForPushNotificationsAsync } from "../config/pushNotification";
+import { useFonts } from "expo-font";
+import * as SplashScreen from "expo-splash-screen";
+
+SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    "Poppins-Regular": require("../../assets/fonts/Poppins-Regular.ttf"),
+    "Poppins-Medium": require("../../assets/fonts/Poppins-Medium.ttf"),
+    "Poppins-SemiBold": require("../../assets/fonts/Poppins-SemiBold.ttf"),
+    "Poppins-Bold": require("../../assets/fonts/Poppins-Bold.ttf"),
+  });
+
   const router = useRouter();
+
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
 
   useEffect(() => {
     let receivedSub: any;
@@ -72,6 +89,10 @@ export default function RootLayout() {
       responseSub?.remove();
     };
   }, [router]);
+
+  if (!loaded && !error) {
+    return null;
+  }
 
   return (
     <ThemeProvider>

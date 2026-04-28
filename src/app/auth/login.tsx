@@ -137,11 +137,6 @@ export default function Index() {
   };
 
   return (
-    <ImageBackground
-      source={require("../../../assets/background.png")}
-      style={styles.container}
-      resizeMode="cover"
-    >
       <KeyboardAvoidingView
         style={{ flex: 1, width: "100%" }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
@@ -156,7 +151,7 @@ export default function Index() {
         >
           <View style={styles.card}>
             <Image
-              source={require("../../../assets/logo-v4system.png")}
+              source={require("../../../assets/logo.png")}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -192,7 +187,6 @@ export default function Index() {
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>
-    </ImageBackground>
   );
 }
 
@@ -208,7 +202,7 @@ const styles = StyleSheet.create({
 
   logo: {
     width: 200,
-    height: 40,
+    height: 140,
     marginBottom: 4,
   },
 
