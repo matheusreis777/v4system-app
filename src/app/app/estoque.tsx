@@ -232,7 +232,7 @@ export default function Estoque() {
       <Header title="Listagem de Veículos" />
 
       <LinearGradient
-        colors={["#061D3D", "#1A4480"]}
+        colors={[theme.primary, theme.mode === 'light' ? '#FF9933' : '#CC6600']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={styles.filtersHeader}

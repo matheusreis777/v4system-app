@@ -47,7 +47,7 @@ export default function Header({
 
   return (
     <LinearGradient
-      colors={["#061D3D", "#1A4480"]}
+      colors={[theme.primary, theme.mode === 'light' ? '#FF9933' : '#CC6600']}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 0 }}
       style={[
@@ -71,7 +71,7 @@ export default function Header({
         <View style={styles.center}>
           {empresa && (
             <Text
-              style={[styles.subtitle, { fontFamily: Fonts.medium }]}
+              style={[styles.subtitle, { fontFamily: Fonts.medium, color: '#fff' }]}
               numberOfLines={1}
               onPress={() => router.replace("/app/intro")}
             >

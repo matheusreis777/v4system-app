@@ -59,7 +59,6 @@ export default function Dashboard() {
   });
 
   const [estoquePorMarca, setEstoquePorMarca] = useState({ labels: [] as string[], quantidades: [] as number[] });
-  const [topCusto, setTopCusto] = useState<any[]>([]);
 
   async function loadDashboard() {
     if (!refreshing) setLoading(true);
@@ -100,8 +99,6 @@ export default function Dashboard() {
           quantidades: graficosV.estoquePorMarca?.quantidades?.slice(0, 5) || []
       });
 
-      setTopCusto(graficosV.topCustoPatio?.slice(0, 3) || []);
-
       // --- LEADS ---
       const dataVendas = respVendas.data;
       const listaVendas = dataVendas?.lista || [];
@@ -109,11 +106,11 @@ export default function Dashboard() {
       
       // Funil por Momento
       const funilMap: any = {
-          1: { nome: "Prospectar", cor: "#6366F1", count: 0 },
-          2: { nome: "Recepcionar", cor: "#8B5CF6", count: 0 },
-          3: { nome: "Qualificar", cor: "#0EA5E9", count: 0 },
-          8: { nome: "Orçamento", cor: "#F59E0B", count: 0 },
-          4: { nome: "Fechamento", cor: "#10B981", count: 0 },
+          1: { nome: "Prospectar", cor: "#FF8000", count: 0 },
+          2: { nome: "Recepcionar", cor: "#FF9933", count: 0 },
+          3: { nome: "Qualificar", cor: "#FFAA66", count: 0 },
+          8: { nome: "Orçamento", cor: "#FFBB88", count: 0 },
+          4: { nome: "Fechamento", cor: "#FFCCAA", count: 0 },
       };
 
       listaVendas.forEach((m: any) => {
@@ -211,7 +208,7 @@ export default function Dashboard() {
             {activeTab === 'leads' ? (
               <>
                 <View style={styles.grid}>
-                   <KpiCard label="Total Leads" value={leadsStats.total} icon="users" color="#6366F1" />
+                   <KpiCard label="Total Leads" value={leadsStats.total} icon="users" color={theme.primary} />
                    <KpiCard label="Novos Hoje" value={leadsStats.novosHoje} icon="plus-circle" color="#10B981" />
                    <KpiCard label="Vendas" value={leadsStats.vendasMes} icon="shopping-bag" color="#F43F5E" />
                    <KpiCard label="Conversão" value={`${leadsStats.taxaConversao}%`} icon="target" color="#F59E0B" />
@@ -254,7 +251,7 @@ export default function Dashboard() {
                             <Text style={styles.progressVal}>{midiasData.quantidades[idx]}</Text>
                          </View>
                          <View style={styles.progressBar}>
-                            <View style={[styles.progressFill, { width: `${(midiasData.quantidades[idx] / leadsStats.total) * 100}%`, backgroundColor: theme.primary }]} />
+                            <View style={[styles.progressFill, { width: `${(midiasData.quantidades[idx] / (leadsStats.total || 1)) * 100}%`, backgroundColor: theme.primary }]} />
                          </View>
                       </View>
                    ))}
@@ -263,14 +260,14 @@ export default function Dashboard() {
             ) : (
               <>
                 <View style={styles.grid}>
-                   <KpiCard label="Estoque" value={vehicleStats.estoque} icon="truck" color="#6366F1" />
+                   <KpiCard label="Estoque" value={vehicleStats.estoque} icon="truck" color={theme.primary} />
                    <KpiCard label="Ticket Médio" value={vehicleStats.ticketMedio} icon="tag" color="#8B5CF6" smallValue />
                    <KpiCard label="Giro Médio" value={`${vehicleStats.tempoMedio}d`} icon="clock" color="#10B981" />
                    <KpiCard label="Margem" value={vehicleStats.margemProjetada} icon="trending-up" color="#F43F5E" smallValue />
                 </View>
 
                 {/* INVESTIMENTO TOTAL */}
-                <LinearGradient colors={[theme.primary, '#1A4480']} style={styles.investCard}>
+                <LinearGradient colors={[theme.primary, theme.mode === 'light' ? '#FF9933' : '#CC6600']} style={styles.investCard}>
                    <Text style={styles.investLabel}>INVESTIMENTO TOTAL EM PÁTIO</Text>
                    <Text style={styles.investValue}>{vehicleStats.investimento}</Text>
                    <MaterialCommunityIcons name="shield-check" size={60} color="rgba(255,255,255,0.1)" style={styles.investIcon} />
@@ -306,6 +303,14 @@ export default function Dashboard() {
         )}
         <View style={{ height: 100 }} />
       </ScrollView>
+
+      {/* FLOATING REFRESH BUTTON */}
+      <TouchableOpacity style={styles.refreshFab} onPress={onRefresh}>
+        <LinearGradient colors={[theme.primary, theme.mode === 'light' ? '#FF9933' : '#CC6600']} style={styles.fabGradient}>
+          <MaterialCommunityIcons name="sync" size={24} color="#fff" />
+        </LinearGradient>
+      </TouchableOpacity>
+
       <BottomTab />
     </View>
   );
@@ -419,4 +424,22 @@ const styles = StyleSheet.create({
   brandRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 8, borderBottomWidth: 1, borderBottomColor: '#F1F5F9' },
   brandName: { fontSize: 14, fontFamily: Fonts.medium, color: '#334155' },
   brandCount: { fontSize: 14, fontFamily: Fonts.bold, color: '#0F172A' },
+  refreshFab: {
+    position: 'absolute',
+    bottom: 90,
+    right: 20,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    elevation: 10,
+    shadowColor: '#000',
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+  },
+  fabGradient: {
+    flex: 1,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });

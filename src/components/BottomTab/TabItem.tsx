@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Animated, TouchableOpacity, Text, StyleSheet } from "react-native";
 import { Fonts } from "../../styles/fonts";
+import { useTheme } from "../../contexts/ThemeContext";
 
 interface TabItemProps {
   label: string;
@@ -10,6 +11,7 @@ interface TabItemProps {
 }
 
 export function TabItem({ label, icon, active, onPress }: TabItemProps) {
+  const { theme } = useTheme();
   const scale = useRef(new Animated.Value(active ? 1.1 : 1)).current;
   const translateY = useRef(new Animated.Value(active ? -6 : 0)).current;
   const opacity = useRef(new Animated.Value(active ? 1 : 0)).current;
@@ -49,6 +51,7 @@ export function TabItem({ label, icon, active, onPress }: TabItemProps) {
         style={[
           styles.label,
           {
+            color: "#fff",
             opacity,
             transform: [
               {
@@ -76,7 +79,6 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 10,
-    color: "#FF8000",
     fontFamily: Fonts.medium,
     marginTop: 4,
   },

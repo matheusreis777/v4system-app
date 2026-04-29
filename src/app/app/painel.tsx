@@ -261,7 +261,7 @@ export default function Painel() {
     <View style={[styles.screen, { backgroundColor: theme.background }]}>
       <RNStatusBar barStyle="light-content" />
       <Header
-        title="Gestão de Vendas"
+        title="PAINEL DE VENDAS"
         leftIcon="chevron-left"
         onLeftPress={() => router.replace("/app/dashboard")}
         rightIcons={[
@@ -275,7 +275,7 @@ export default function Painel() {
       />
 
       <LinearGradient
-        colors={["#061D3D", "#1A4480"]}
+        colors={[theme.primary, theme.mode === 'light' ? '#FF9933' : '#CC6600']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 0 }}
         style={styles.filtersHeader}
@@ -437,6 +437,7 @@ function irParaDetalhes(id: number) {
 }
 
 function CardMovimentacao({ item, onCancel }: CardMovimentacaoProps) {
+  const { theme } = useTheme();
   const labelMomento = safeLabel(
     item.momentoId ? obterLabelMomento(item.momentoId) : null,
   );
@@ -465,7 +466,7 @@ function CardMovimentacao({ item, onCancel }: CardMovimentacaoProps) {
       style={styles.card}
       onPress={() => irParaDetalhes(item.movimentacaoId)}
     >
-      <View style={[styles.cardHeader, { backgroundColor: "#061D3D" }]}>
+      <View style={[styles.cardHeader, { backgroundColor: theme.primary }]}>
         <Text style={[styles.cardTitle, { fontFamily: Fonts.condensedBold }]}>{item.clienteNome ?? "Cliente"}</Text>
       </View>
 
@@ -596,7 +597,7 @@ const styles = StyleSheet.create({
   },
 
   cardHeader: {
-    backgroundColor: "#2563EB",
+    backgroundColor: "#FF8000",
     padding: 12,
     borderRadius: 10,
   },

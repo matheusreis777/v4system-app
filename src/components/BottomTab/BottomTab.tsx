@@ -5,6 +5,7 @@ import { TabItem } from "./TabItem";
 import { notificacaoService } from "../../services/notificacaoService";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState, useCallback } from "react";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const tabs = [
   { label: "Início", route: "/app/dashboard", icon: "dashboard" },
@@ -16,6 +17,7 @@ const tabs = [
 
 export default function BottomTab() {
   const pathname = usePathname();
+  const { theme } = useTheme();
   const [qtdNaoLidas, setQtdNaoLidas] = useState(0);
 
   async function carregarQuantidade() {
@@ -46,7 +48,7 @@ export default function BottomTab() {
   );
 
   function renderIcon(name: string, active: boolean) {
-    const color = active ? "#FF8000" : "rgba(255,255,255,0.55)";
+    const color = active ? "#fff" : "rgba(255, 255, 255, 0.6)"; 
     const size = 22;
 
     if (name === "notificacoes") {
@@ -55,8 +57,8 @@ export default function BottomTab() {
           <Feather name="bell" size={size} color={color} />
 
           {qtdNaoLidas > 0 && (
-            <View style={styles.badge}>
-              <Text style={styles.badgeText}>
+            <View style={[styles.badge, { backgroundColor: theme.accent }]}>
+              <Text style={[styles.badgeText, { color: '#fff' }]}>
                 {qtdNaoLidas > 99 ? "99+" : qtdNaoLidas}
               </Text>
             </View>
@@ -82,7 +84,7 @@ export default function BottomTab() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.primary }]}>
       {tabs.map((tab) => {
         const isActive = pathname === tab.route;
 
@@ -104,7 +106,6 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     height: 62,
-    backgroundColor: "#061D3D",
     position: "absolute",
     bottom: 0,
     left: 0,
@@ -122,7 +123,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: -6,
     right: -10,
-    backgroundColor: "#FF8000",
     borderRadius: 10,
     minWidth: 18,
     height: 18,
