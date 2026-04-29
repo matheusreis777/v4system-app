@@ -1,4 +1,6 @@
 import { Stack } from "expo-router";
+import { Platform } from "react-native";
+import * as NavigationBar from "expo-navigation-bar";
 import { ThemeProvider } from "../contexts/ThemeContext";
 import { AuthProvider } from "../contexts/AuthContext";
 import { LoadingProvider } from "../contexts/LoadingContext";
@@ -11,6 +13,7 @@ import { useRouter } from "expo-router";
 import { registerForPushNotificationsAsync } from "../config/pushNotification";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -36,6 +39,13 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded, error]);
+
+  useEffect(() => {
+    if (Platform.OS === "android") {
+      NavigationBar.setBackgroundColorAsync("#061D3D");
+      NavigationBar.setButtonStyleAsync("light");
+    }
+  }, []);
 
   useEffect(() => {
     let receivedSub: any;
@@ -111,6 +121,7 @@ export default function RootLayout() {
                 <Stack
                   screenOptions={{ headerShown: false, animation: "fade" }}
                 />
+                <StatusBar style="light" />
                 <Toast config={toastConfig} />
               </>
             </LookupProviderEstoque>

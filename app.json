@@ -13,6 +13,7 @@
         "resizeMode": "contain",
         "backgroundColor": "#061D3D"
       },
+
       "ios": {
         "supportsTablet": true,
         "bundleIdentifier": "com.v4system.crm"
@@ -23,14 +24,7 @@
           "foregroundImage": "./assets/icon.png",
           "backgroundColor": "#061D3D"
         },
-        "statusBar": {
-          "backgroundColor": "#061D3D",
-          "statusBarStyle": "light-content"
-        },
-        "navigationBar": {
-          "backgroundColor": "#061D3D",
-          "buttonColor": "light"
-        },
+
         "googleServicesFile": "./google-services.json",
         "edgeToEdgeEnabled": true,
         "softwareKeyboardLayoutMode": "pan",
@@ -42,7 +36,14 @@
         "expo-notifications",
         "expo-secure-store",
         "expo-font",
-        "expo-router"
+        "expo-router",
+        [
+          "expo-navigation-bar",
+          {
+            "backgroundColor": "#061D3D",
+            "barStyle": "light"
+          }
+        ]
       ],
       "extra": {
         "eas": {
